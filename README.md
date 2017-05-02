@@ -9,7 +9,7 @@ Example of review-fetcher running with the html scraping: https://review-fetcher
 
 How does it do this?  
 =========
-It fetch all ios reviews from the itunes rss feed:
+It fetches all ios reviews from the itunes rss feed:
 https://itunes.apple.com/gb/rss/customerreviews/page=1/id=1063224663/sortby=mostrecent/xml
 For android it either uses html scraping or the official google api.
 Scraping: https://github.com/facundoolano/google-play-scraper
@@ -29,11 +29,11 @@ Create the table as specified in dbStructure. You can do this automatically by r
 Open configs.js, and follow the instructions in the file.
 
 ### Running it
-You need to run startFetching once to fill the database. After the initial fetch I would advice to schedule it to run every 10 minutes to keep your database up to date. After the database is filled you can run node index.js to start the website.
+You need to run node startFetching.js once to fill the database. After the initial fetch I would advice to schedule it to run every 10 minutes to keep your database up to date. After the database is filled you can run node index.js to start the website.
 Then in your web browser open:
-localhost:8000/<app name from config>/android
-localhost:8000/<app name from config>/ios
-localhost:8000/<app name from config>/graph
+localhost:8000/&lt;app name from config&gt;/android
+localhost:8000/&lt;app name from config&gt;/ios
+localhost:8000/&lt;app name from config&gt;/graph
 
 How to set it up in heroku?  
 =========
@@ -55,6 +55,6 @@ Configure heroku scheduler to run startFetching.js to run every 10 minutes.
 After that just do a git push to deploy review-fetcher.
 
 Then in your web browser open:
-<Heroku url>/<app name from config>/android
-<Heroku url>/<app name from config>/ios
-<Heroku url>/<app name from config>/graph
+&lt;Heroku url&gt;/&lt;app name from config&gt;/android
+&lt;Heroku url&gt;/&lt;app name from config&gt;/ios
+&lt;Heroku url&gt;/&lt;app name from config&gt;/graph
