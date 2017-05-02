@@ -148,21 +148,7 @@ function blukUpdate(reviewsToUpdate, callback) {
 			reviewinfo: review.reviewInfo
 		});
 	});
-	var Column = pgp.helpers.Column;
-	var reviewidColumn = new Column('reviewid');
-	var deviceinfoColumn = new Column({
-		name: 'deviceinfo',
-		cast: 'json',
-	});
-	var appinfoColumn = new Column({
-		name: 'appinfo',
-		cast: 'json',
-	});
-	var reviewInfoColumn = new Column({
-		name: 'reviewinfo',
-		cast: 'json',
-	});
-	var cs = new pgp.helpers.ColumnSet([reviewidColumn, deviceinfoColumn, appinfoColumn, reviewInfoColumn], {
+	var cs = new pgp.helpers.ColumnSet(['reviewid', 'deviceinfo:json', 'appinfo:json', 'reviewinfo:json'], {
 		table: 'reviewjson'
 	});
 
