@@ -1,7 +1,7 @@
 var gplay = require('google-play-scraper');
 var google = require('googleapis');
 var Review = require('./review');
-var LocaleHelper = require('./LocaleHelper');
+var LocaleHelper = require('./localeHelper');
 var localeHelper = new LocaleHelper();
 
 module.exports = class AndroidFetcher {

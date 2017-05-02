@@ -2,7 +2,7 @@ var async = require('async');
 var request = require('request');
 var XMLParser = require('xml2js');
 var Review = require('./review');
-var LocaleHelper = require('./LocaleHelper');
+var LocaleHelper = require('./localeHelper');
 var localeHelper = new LocaleHelper();
 
 module.exports = class IOSFetcher {

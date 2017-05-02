@@ -1,12 +1,12 @@
 var express = require('express');
 var app = express();
-var DataExport = require('./DataExport');
+var DataExport = require('./dataExport');
 var dataExport = new DataExport();
-var ReviewJSONDB = require('./ReviewJSONDB');
+var ReviewJSONDB = require('./reviewJSONDB');
 var reviewDB = new ReviewJSONDB();
-var DataMapper = require('./DataMapper');
+var DataMapper = require('./dataMapper');
 var dataMapper = new DataMapper();
-var GraphDrawer = require('./GraphDrawer');
+var GraphDrawer = require('./graphDrawer');
 var graphDrawer = new GraphDrawer();
 var AndroidFetcher = require('./android-fetcher');
 var configs = require('./configs');
@@ -76,7 +76,7 @@ function iosAverage(reviews, completion) {
 
 function constructJSONDump(config, response) {
 	console.time('Exporting JSON');
-	dataExport.exportJSON(config, function(data, fileName){
+	dataExport.exportJSON(config, function (data, fileName) {
 		sendFile(data, fileName, 'application/json', response)
 		console.timeEnd('Exporting JSON');
 	});
@@ -84,7 +84,7 @@ function constructJSONDump(config, response) {
 
 function constructXMLDump(config, response) {
 	console.time('Exporting XML');
-	dataExport.exportXML(config, function(data, fileName){
+	dataExport.exportXML(config, function (data, fileName) {
 		sendFile(data, fileName, 'text/xml', response)
 		console.timeEnd('Exporting XML');
 	});
@@ -92,7 +92,7 @@ function constructXMLDump(config, response) {
 
 function constructCSVDump(config, response) {
 	console.time('Exporting csv');
-	dataExport.exportCSV(config, function(data, fileName){
+	dataExport.exportCSV(config, function (data, fileName) {
 		sendFile(data, fileName, 'text/csv', response)
 		console.timeEnd('Exporting csv');
 	});
@@ -125,8 +125,8 @@ function sendImage(name, response) {
 
 function sendFile(data, fileName, content, response) {
 	response.writeHead(200, {
-		'Content-Type': content+'; charset=utf-8',
-		'Content-Disposition': 'attachment;filename='+fileName
+		'Content-Type': content + '; charset=utf-8',
+		'Content-Disposition': 'attachment;filename=' + fileName
 	});
 	response.end(data);
 }

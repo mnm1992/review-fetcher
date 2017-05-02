@@ -2,7 +2,7 @@ var dateLib = require('date-and-time');
 var gplay = require('google-play-scraper');
 var Review = require('./review');
 var async = require('async');
-var LocaleHelper = require('./LocaleHelper');
+var LocaleHelper = require('./localeHelper');
 var localeHelper = new LocaleHelper();
 
 function convertDateStringToDate(dateString) {

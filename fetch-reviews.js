@@ -1,11 +1,9 @@
-#!/usr/bin/env node
-
 var async = require('async');
 var configs = require('./configs');
 var IOSFetcher = require('./ios-fetcher');
 var AndroidScraper = require('./android-scraper');
 var AndroidFetcher = require('./android-fetcher');
-var ReviewJSONDB = require('./ReviewJSONDB');
+var ReviewJSONDB = require('./reviewJSONDB');
 var reviewDB = new ReviewJSONDB();
 var slackLibrary = require('slack-node');
 var slack = new slackLibrary();
