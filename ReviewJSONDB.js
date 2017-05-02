@@ -81,7 +81,7 @@ function getAllReviewsWithWhere(config, where, input, callback) {
 			callback(reviews);
 		})
 		.catch(function (error) {
-			console.log(error);
+			console.error(error);
 			callback([]);
 		});
 }
@@ -127,7 +127,7 @@ function blukInsert(reviewsToInsert, callback) {
 			callback();
 		})
 		.catch(error => {
-			console.log(error);
+			console.error(error);
 			callback();
 		});
 }
@@ -172,7 +172,7 @@ function blukUpdate(reviewsToUpdate, callback) {
 			callback();
 		})
 		.catch(error => {
-			console.log(error);
+			console.error(error);
 			callback();
 		});
 }
