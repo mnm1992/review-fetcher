@@ -1,9 +1,9 @@
 {
   "name": "review-fetcher",
   "version": "1.0.0",
-  "description": "An app that fetches all reviews for the uGrow app",
+  "description": "It fetches Android and iOS reviews for all configured apps. It then show these at it's website or/and posts them to slack. ",
   "engines": {
-    "node": "7.7.3"
+    "node": "7.9.0"
   },
   "main": "index.js",
   "scripts": {
@@ -21,7 +21,6 @@
     "googleapis": "^14.2.0",
     "json2csv": "^3.7.3",
     "object-hash": "^1.1.8",
-    "pg": "^6.1.5",
     "pg-promise": "^5.6.7",
     "request": "^2.81.0",
     "slack-node": "^0.1.8",
