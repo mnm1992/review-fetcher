@@ -3,16 +3,16 @@ Review fetcher
 
 What does it do?  
 =========
-It fetches Android and iOS reviews for all configured apps. It then show these at it's website or/and posts them to slack.
-Example of review-fetcher running with the google api: https://review-fetcher.herokuapp.com/ugrow/android
+It fetches Android and iOS reviews for all configured apps. It then show these at it's website or/and posts them to slack.</br>
+Example of review-fetcher running with the google api: https://review-fetcher.herokuapp.com/ugrow/android</br>
 Example of review-fetcher running with the html scraping: https://review-fetcher.herokuapp.com/ugrow/android
 
 How does it do this?  
 =========
 It fetches all ios reviews from the itunes rss feed:
-https://itunes.apple.com/gb/rss/customerreviews/page=1/id=1063224663/sortby=mostrecent/xml
-For android it either uses html scraping or the official google api.
-Scraping: https://github.com/facundoolano/google-play-scraper
+https://itunes.apple.com/gb/rss/customerreviews/page=1/id=1063224663/sortby=mostrecent/xml</br>
+For android it either uses html scraping or the official google api.</br>
+Scraping: https://github.com/facundoolano/google-play-scraper</br>
 Google API: https://developers.google.com/android-publisher/api-ref/reviews
 
 How to set it up locally?  
@@ -30,17 +30,17 @@ Open configs.js, and follow the instructions in the file.
 
 ### Running it
 You need to run node startFetching.js once to fill the database. After the initial fetch I would advice to schedule it to run every 10 minutes to keep your database up to date. After the database is filled you can run node index.js to start the website.
-Then in your web browser open:
-localhost:8000/&lt;app name from config&gt;/android
-localhost:8000/&lt;app name from config&gt;/ios
+Then in your web browser open:</br>
+localhost:8000/&lt;app name from config&gt;/android</br>
+localhost:8000/&lt;app name from config&gt;/ios</br>
 localhost:8000/&lt;app name from config&gt;/graph
 
 How to set it up in heroku?  
 =========
 
 ### Prerequisites
-Add heroku postgres and heroku scheduler. This program can in heroku free tier, but you'll need a verified account to install these dependencies.
-Follow the following steps to configure node for heroku on your machine.
+Add heroku postgres and heroku scheduler. This program can in heroku free tier, but you'll need a verified account to install these dependencies.</br>
+Follow the following steps to configure node for heroku on your machine.</br>
 https://devcenter.heroku.com/articles/getting-started-with-nodejs#set-up
 
 ### Setting up DB
@@ -54,7 +54,7 @@ Open configs.js, and follow the instructions in the file.
 Configure heroku scheduler to run startFetching.js to run every 10 minutes.
 After that just do a git push to deploy review-fetcher.
 
-Then in your web browser open:
-&lt;Heroku url&gt;/&lt;app name from config&gt;/android
-&lt;Heroku url&gt;/&lt;app name from config&gt;/ios
+Then in your web browser open:</br>
+&lt;Heroku url&gt;/&lt;app name from config&gt;/android</br>
+&lt;Heroku url&gt;/&lt;app name from config&gt;/ios</br>
 &lt;Heroku url&gt;/&lt;app name from config&gt;/graph
