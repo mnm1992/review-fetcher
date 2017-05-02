@@ -1,5 +1,5 @@
 var dateLib = require('date-and-time');
-var ReviewJSONDB = require('./ReviewJSONDB');
+var ReviewJSONDB = require('./reviewJSONDB');
 var reviewDB = new ReviewJSONDB();
 
 Date.prototype.addDays = function (days) {

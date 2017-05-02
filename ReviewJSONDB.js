@@ -1,3 +1,4 @@
+var Review = require('./review');
 var pgp = require('pg-promise')({
 	capSQL: true
 });
@@ -67,7 +68,6 @@ function removeOldReviewsFromArray(oldReviews, newReviews) {
 
 function getAllReviewsWithWhere(config, where, input, callback) {
 	var reviews = [];
-	var Review = require('./review');
 	db.any('SELECT deviceinfo, appinfo, reviewinfo FROM reviewjson WHERE ' + where + ' ORDER BY reviewinfo->>\'dateTime\' desc', input)
 		.then(function (result) {
 			result.forEach(function (review) {
