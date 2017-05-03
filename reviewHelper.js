@@ -51,6 +51,7 @@ module.exports = {
 				result.reviewsToInsert.push(fetchedReview);
 			} else {
 				var mergedReview = mergeReviews(foundReview, fetchedReview);
+				result.newReviews.push(mergedReview);
 				result.reviewsToUpdate.push(mergedReview);
 			}
 		});

@@ -30,6 +30,9 @@ var oldReviewInfoColumn = new Column({
   name: 'oldreviewinfo',
   cast: 'json',
 });
+var cs = new pgp.helpers.ColumnSet([reviewidColumn, appidColumn, deviceinfoColumn, appinfoColumn, reviewInfoColumn, oldReviewInfoColumn], {
+  table: 'reviewjson'
+});
 
 function getAllReviewsWithWhere(config, where, input, callback) {
   var reviews = [];
@@ -61,29 +64,10 @@ function blukInsert(reviewsToInsert, callback) {
     callback();
     return;
   }
-  var values = [];
   console.log('Inserting ' + reviewsToInsert.length + ' into the db');
-  reviewsToInsert.forEach(function(review) {
-    values.push({
-      reviewid: review.reviewInfo.id,
-      appid: review.appInfo.id,
-      deviceinfo: review.deviceInfo,
-      appinfo: review.appInfo,
-      reviewinfo: review.reviewInfo
-    });
-  });
-  var cs = new pgp.helpers.ColumnSet([reviewidColumn, appidColumn, deviceinfoColumn, appinfoColumn, reviewInfoColumn], {
-    table: 'reviewjson'
-  });
+  var values = generateValuesForDb(reviewsToInsert);
   var query = pgp.helpers.insert(values, cs);
-  db.none(query)
-    .then(data => {
-      callback();
-    })
-    .catch(error => {
-      console.error(error);
-      callback();
-    });
+  executeNoResultDbQuery(query, callback);
 }
 
 function blukUpdate(reviewsToUpdate, callback) {
@@ -93,31 +77,32 @@ function blukUpdate(reviewsToUpdate, callback) {
     return;
   }
   console.log('Updating ' + reviewsToUpdate.length + ' reviews');
+  var values = generateValuesForDb(reviewsToUpdate);
+  var query = pgp.helpers.update(values, cs) + ' WHERE v.reviewid = t.reviewid';
+  executeNoResultDbQuery(query, callback);
+}
+
+function generateValuesForDb(reviews) {
   var values = [];
-  reviewsToUpdate.forEach(function(review) {
+  reviews.forEach(function(review) {
     values.push({
-      reviewid: review.reviewid,
+      reviewid: review.reviewInfo.id,
+      appid: review.appInfo.id,
       deviceinfo: review.deviceInfo,
       appinfo: review.appInfo,
       reviewinfo: review.reviewInfo,
       oldreviewinfo: review.oldReviewInfo ? review.oldReviewInfo : {}
     });
   });
-  var Column = pgp.helpers.Column;
-  var whereReviewidColumn = new Column({
-    name: 'reviewid',
-    cnd: true
-  });
-  var cs = new pgp.helpers.ColumnSet([whereReviewidColumn, deviceinfoColumn, appinfoColumn, reviewInfoColumn, oldReviewInfoColumn], {
-    table: 'reviewjson'
-  });
+  return values;
+}
 
-  var query = pgp.helpers.update(values, cs) + ' WHERE v.reviewid = t.reviewid';
+function executeNoResultDbQuery(query, callback) {
   db.none(query)
-    .then(data => {
+    .then(function(result) {
       callback();
     })
-    .catch(error => {
+    .catch(function(error) {
       console.error(error);
       callback();
     });
