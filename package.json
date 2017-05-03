@@ -10,12 +10,12 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "android-device-list": "^1.1.70",
+    "android-device-list": "^1.1.71",
     "android-versions": "^1.1.0",
-    "async": "2.1.2",
+    "async": "^2.1.2",
     "country-language": "^0.1.7",
     "date-and-time": "^0.4.0",
-    "ejs": "^2.5.5",
+    "ejs": "^2.5.6",
     "express": "^4.15.2",
     "google-play-scraper": "^3.2.4",
     "googleapis": "^14.2.0",
