@@ -13,18 +13,18 @@ function removeDuplicates(input, prioritisedType) {
 	return output;
 }
 
-function mergeReviews(review1, review2) {
-	var laterReview = review1.reviewInfo.dateTime > review2.reviewInfo.dateTime ? review1 : review2;
-	var olderReview = laterReview === review1 ? review2 : review1;
+function mergeReviews(dbReview, fetchedReview) {
+	var laterReview = dbReview.reviewInfo.dateTime > fetchedReview.reviewInfo.dateTime ? dbReview : fetchedReview;
+	var olderReview = laterReview === dbReview ? fetchedReview : dbReview;
 	if (laterReview.reviewInfo.dateTime > olderReview.reviewInfo.dateTime) {
-		laterReview.oldReviewInfo = {};
-		laterReview.oldReviewInfo.reviewInfo = olderReview.reviewInfo;
-		laterReview.oldReviewInfo.deviceInfo = olderReview.deviceInfo;
-		laterReview.oldReviewInfo.appInfo = olderReview.appInfo;
-		laterReview.showOnSlack = true;
-		console.log('A review got updated it moved from: ' + olderReview.reviewInfo.dateTime + ' to ' + laterReview.reviewInfo.dateTime);
-	} else if (olderReview.reviewInfo.source === 'API') {
-		return olderReview;
+		if(laterReview === fetchedReview){//Since scraped copmponent don't have time, this check prevents the db one from winning
+			laterReview.oldReviewInfo = {};
+			laterReview.oldReviewInfo.reviewInfo = olderReview.reviewInfo;
+			laterReview.oldReviewInfo.deviceInfo = olderReview.deviceInfo;
+			laterReview.oldReviewInfo.appInfo = olderReview.appInfo;
+			laterReview.showOnSlack = true;
+			console.log('A review got updated it moved from: ' + olderReview.reviewInfo.dateTime + ' to ' + laterReview.reviewInfo.dateTime);
+		}
 	}
 	return laterReview;
 }
@@ -51,7 +51,9 @@ module.exports = {
 				result.reviewsToInsert.push(fetchedReview);
 			} else {
 				var mergedReview = mergeReviews(foundReview, fetchedReview);
-				result.newReviews.push(mergedReview);
+				if(mergedReview.showOnSlack){
+					result.newReviews.push(mergedReview);
+				}
 				result.reviewsToUpdate.push(mergedReview);
 			}
 		});
