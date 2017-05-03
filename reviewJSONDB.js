@@ -149,12 +149,13 @@ module.exports = class ReviewJSONDB {
       console.log('Reviews in db: ' + (reviewsFromDB ? reviewsFromDB.length : 0));
       console.log('Reviews fetched: ' + (reviewsFetched ? reviewsFetched.length : 0));
       console.log('New reviews: ' + cleanReviews.newReviews.length);
-      console.time('Updated all reviews');
+      console.time('Inserted all reviews');
       blukInsert(cleanReviews.reviewsToInsert, function() {
-        console.timeEnd('Updated all reviews');
-        console.time('Inserted all reviews');
+        console.timeEnd('Inserted all reviews');
+        console.time('Updated all reviews');
         blukUpdate(cleanReviews.reviewsToUpdate, function() {
-          console.timeEnd('Inserted all reviews');
+          console.timeEnd('Updated all reviews');
+          pgp.end();
           callback(cleanReviews.newReviews);
         });
       });

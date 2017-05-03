@@ -62,7 +62,8 @@ function fetchReviewSet(appId, lang, header, page, completion) {
 	gplay.reviews({
 		appId: appId,
 		page: page,
-		lang: lang
+		lang: lang,
+		cache: false
 	}).then(function (apps) {
 		var count = apps.length;
 		if (count === 0) {
@@ -115,7 +116,8 @@ module.exports = class AndroidScraper {
 
 	fetchRatings(callback) {
 		gplay.app({
-			appId: this.config.androidId
+			appId: this.config.androidId,
+			cache: false
 		}).then(function (app) {
 			var numberOfReviews = parseInt(app.reviews);
 			var averageRating = parseFloat(app.score);

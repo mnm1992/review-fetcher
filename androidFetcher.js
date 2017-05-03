@@ -14,7 +14,8 @@ module.exports = class AndroidFetcher {
 
 	fetchRatings(callback) {
 		gplay.app({
-			appId: this.config.androidId
+			appId: this.config.androidId,
+			cache: false
 		}).then(function (app) {
 			var numberOfReviews = parseInt(app.reviews);
 			var averageRating = parseFloat(app.score);
