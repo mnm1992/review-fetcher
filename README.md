@@ -5,7 +5,7 @@ What does it do?
 =========
 It fetches Android and iOS reviews for all configured apps. It then show these at it's website or/and posts them to slack.</br>
 Example of review-fetcher running with the google api: https://review-fetcher.herokuapp.com/ugrow/android</br>
-Example of review-fetcher running with the html scraping: https://review-fetcher.herokuapp.com/ugrow/android
+Example of review-fetcher running with the html scraping: https://review-fetcher.herokuapp.com/compass/android
 
 How does it do this?  
 =========
