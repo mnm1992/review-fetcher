@@ -114,7 +114,7 @@ function shareOnSlack(config, reviews, callback) {
 	console.log('Sharing ' + reviews.length + ' on slack');
 	var text = '';
 	reviews.forEach(function (entry) {
-		if (!entry.responseGiven) {
+		if (!entry.showOnSlack) {
 			text += entry.createReviewSlackText();
 		}
 	});

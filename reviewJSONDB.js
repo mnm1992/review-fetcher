@@ -11,71 +11,20 @@ var connectionString = process.env.DATABASE_URL ? process.env.DATABASE_URL : {
 };
 var db = pgp(connectionString);
 
-function removeDuplicateKeysFromArray(reviews) {
-	var reviewArray = [];
-	var reviewMap = {};
-	reviews.forEach(function (review) {
-		if (!reviewMap[review.reviewInfo.id]) {
-			reviewMap[review.reviewInfo.id] = review;
-		} else {
-			if (reviewMap[review.reviewInfo.id].reviewInfo.source === 'Scraped') {
-				reviewMap[review.reviewInfo.id] = review;
-			}
-		}
-	});
-	for (var key in reviewMap) {
-		reviewArray.push(reviewMap[key]);
-	}
-	return reviewArray;
-}
-
-function removeOldReviewsFromArray(oldReviews, newReviews) {
-	newReviews = removeDuplicateKeysFromArray(newReviews);
-	var result = {
-		'reviewsToUpdate': [],
-		'reviewsToInsert': [],
-		'newReviews': []
-	};
-	var oldReviewMap = {};
-	oldReviews.forEach(function (oldReview) {
-		oldReviewMap[oldReview.reviewInfo.id] = oldReview;
-	});
-
-	var onlyNewReviews = [];
-	newReviews.forEach(function (newReview) {
-		if (newReview) {
-			var foundReview = oldReviewMap[newReview.reviewInfo.id];
-			var isNewer = false;
-			if (foundReview) {
-				isNewer = newReview.reviewInfo.dateTime > foundReview.reviewInfo.dateTime;
-				newReview.update = true;
-				newReview.responseGiven = true;
-				if (isNewer) {
-					newReview.responseGiven = false;
-					console.log('Found an update for a review');
-				}
-			}
-			if (!foundReview) {
-				result.newReviews.push(newReview);
-				result.reviewsToInsert.push(newReview);
-			} else if (foundReview.reviewInfo.source === 'Scraped' || newReview.reviewInfo.source === 'API') {
-				result.reviewsToUpdate.push(newReview);
-			}
-		}
-	});
-	return result;
-}
-
 function getAllReviewsWithWhere(config, where, input, callback) {
 	var reviews = [];
-	db.any('SELECT deviceinfo, appinfo, reviewinfo FROM reviewjson WHERE ' + where + ' ORDER BY reviewinfo->>\'dateTime\' desc', input)
+	db.any('SELECT deviceinfo, appinfo, reviewinfo, oldReviewInfo FROM reviewjson WHERE ' + where + ' ORDER BY reviewinfo->>\'dateTime\' desc', input)
 		.then(function (result) {
 			result.forEach(function (review) {
 				if (review) {
 					var deviceInfo = review.deviceinfo;
 					var appInfo = review.appinfo;
 					var reviewInfo = review.reviewinfo;
-					reviews.push(new Review(deviceInfo, appInfo, reviewInfo));
+					var createdReview = new Review(deviceInfo, appInfo, reviewInfo);
+					if (review.oldReviewInfo && review.oldReviewInfo.length > 0) {
+						createdReview.oldReviewInfo = review.oldReviewInfo;
+					}
+					reviews.push(createdReview);
 				}
 			});
 			callback(reviews);
@@ -145,7 +94,8 @@ function blukUpdate(reviewsToUpdate, callback) {
 			reviewid: review.reviewid,
 			deviceinfo: review.deviceInfo,
 			appinfo: review.appInfo,
-			reviewinfo: review.reviewInfo
+			reviewinfo: review.reviewInfo,
+			oldreviewinfo: review.oldReviewInfo ? review.oldReviewInfo : {}
 		});
 	});
 	var Column = pgp.helpers.Column;
@@ -162,7 +112,11 @@ function blukUpdate(reviewsToUpdate, callback) {
 		name: 'reviewinfo',
 		cast: 'json',
 	});
-	var cs = new pgp.helpers.ColumnSet([reviewidColumn, deviceinfoColumn, appinfoColumn, reviewInfoColumn], {
+	var oldReviewInfoColumn = new Column({
+		name: 'oldreviewinfo',
+		cast: 'json',
+	});
+	var cs = new pgp.helpers.ColumnSet([reviewidColumn, deviceinfoColumn, appinfoColumn, reviewInfoColumn, oldReviewInfoColumn], {
 		table: 'reviewjson'
 	});
 
@@ -198,7 +152,7 @@ module.exports = class ReviewJSONDB {
 		this.getAllReviews(config, function (reviews) {
 			console.timeEnd('Fetched all reviews');
 			console.time('Checking for duplicates');
-			var cleanReviews = removeOldReviewsFromArray(reviews, newReviews);
+			var cleanReviews = reviewHelper.mergeReviewsFromArrays(reviews, newReviews);
 			console.timeEnd('Checking for duplicates');
 			console.log('Reviews in db: ' + (reviews ? reviews.length : 0));
 			console.log('Reviews fetched: ' + (newReviews ? newReviews.length : 0));
