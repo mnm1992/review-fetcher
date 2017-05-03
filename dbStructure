@@ -3,6 +3,7 @@ CREATE TABLE reviewJSON(
   appid TEXT NOT NULL,
   deviceInfo JSON NOT NULL,
   appInfo JSON NOT NULL,
+  reviewInfo JSON NOT NULL,
   oldReviewInfo JSON
 );
 ALTER TABLE reviewJSON ADD COLUMN oldReviewInfo JSON;

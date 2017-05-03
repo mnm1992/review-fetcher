@@ -1,15 +1,16 @@
-function removeDuplicates(reviewArray, prioritisedType) {
+function removeDuplicates(input, prioritisedType) {
+	var output = [];
 	var reviewMap = {};
-	reviewArray.forEach(function (review) {
+	input.forEach(function (review) {
 		var oldReview = reviewMap[review.reviewInfo.id];
 		if (!oldReview || (review.reviewInfo.source === prioritisedType)) {
 			reviewMap[review.reviewInfo.id] = review;
 		}
 	});
 	for (var key in reviewMap) {
-		reviewArray.push(reviewMap[key]);
+		output.push(reviewMap[key]);
 	}
-	return reviewArray;
+	return output;
 }
 
 function mergeReviews(review1, review2) {
@@ -21,6 +22,7 @@ function mergeReviews(review1, review2) {
 		laterReview.oldReviewInfo.deviceInfo = olderReview.deviceInfo;
 		laterReview.oldReviewInfo.appInfo = olderReview.appInfo;
 		laterReview.showOnSlack = true;
+		console.log('A review got updated it moved from: ' + olderReview.reviewInfo.dateTime + ' to ' + laterReview.reviewInfo.dateTime);
 	} else if (olderReview.reviewInfo.source === 'API') {
 		return olderReview;
 	}
@@ -29,26 +31,26 @@ function mergeReviews(review1, review2) {
 
 module.exports = {
 
-	mergeReviewsFromArrays: function (oldReviews, newReviews) {
-		newReviews = removeDuplicates(newReviews, 'API');
+	mergeReviewsFromArrays: function (reviewsFromDB, reviewsFetched) {
+		reviewsFetched = removeDuplicates(reviewsFetched, 'API');
 		var result = {
 			'reviewsToUpdate': [],
 			'reviewsToInsert': [],
 			'newReviews': []
 		};
-		var oldReviewMap = {};
-		oldReviews.forEach(function (oldReview) {
-			oldReviewMap[oldReview.reviewInfo.id] = oldReview;
+		var dbReviewMap = {};
+		reviewsFromDB.forEach(function (dbReview) {
+			dbReviewMap[dbReview.reviewInfo.id] = dbReview;
 		});
 
 		var onlyNewReviews = [];
-		newReviews.forEach(function (newReview) {
-			var foundReview = oldReviewMap[newReview.reviewInfo.id];
+		reviewsFetched.forEach(function (fetchedReview) {
+			var foundReview = dbReviewMap[fetchedReview.reviewInfo.id];
 			if (!foundReview) {
-				result.newReviews.push(newReview);
-				result.reviewsToInsert.push(newReview);
+				result.newReviews.push(fetchedReview);
+				result.reviewsToInsert.push(fetchedReview);
 			} else {
-				var mergedReview = mergeReviews(foundReview, newReview);
+				var mergedReview = mergeReviews(foundReview, fetchedReview);
 				result.reviewsToUpdate.push(mergedReview);
 			}
 		});
