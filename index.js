@@ -8,7 +8,7 @@ var DataMapper = require('./dataMapper');
 var dataMapper = new DataMapper();
 var GraphDrawer = require('./graphDrawer');
 var graphDrawer = new GraphDrawer();
-var AndroidFetcher = require('./android-fetcher');
+var AndroidFetcher = require('./androidFetcher');
 var configs = require('./configs');
 var fs = require('fs');
 

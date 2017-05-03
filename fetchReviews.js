@@ -1,8 +1,8 @@
 var async = require('async');
 var configs = require('./configs');
-var IOSFetcher = require('./ios-fetcher');
-var AndroidScraper = require('./android-scraper');
-var AndroidFetcher = require('./android-fetcher');
+var IOSFetcher = require('./iosFetcher');
+var AndroidScraper = require('./androidScraper');
+var AndroidFetcher = require('./androidFetcher');
 var ReviewJSONDB = require('./reviewJSONDB');
 var reviewDB = new ReviewJSONDB();
 var slackLibrary = require('slack-node');

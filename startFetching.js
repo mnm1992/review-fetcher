@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-var fetcher = require('./fetch-reviews');
+var fetcher = require('./fetchReviews');
 fetcher.fetchReviews(function () {
 	process.exit();
 });
