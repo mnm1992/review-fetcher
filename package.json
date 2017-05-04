@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "It fetches Android and iOS reviews for all configured apps. It then show these at it's website or/and posts them to slack. ",
   "engines": {
-    "node": "7.9.0",
+    "node": "7.10.0",
     "npm": "4.6.1"
   },
   "main": "index.js",

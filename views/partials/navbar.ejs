@@ -25,40 +25,40 @@
   <span class="navbar-toggler-icon"></span>
 </button>
   <% if(appName === 'uGrow'){ %>
-    <a class="navbar-brand" href="">
-      <img src="logo.png" width="30" height="30" alt="">
+    <a class="navbar-brand" href="/<%= appName.toLowerCase() %>">
+      <img src="/ugrow/logo.png" width="30" height="30" alt="">
     </a>
   <% } %>
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav">
       <li class="nav-item">
         <% if(platform === 'Android'){ %>
-          <a class="nav-link active" href="android">Android</a>
+          <a class="nav-link active" href="/<%= appName.toLowerCase() %>/android">Android</a>
         <% } else { %>
-          <a class="nav-link" href="android">Android</a>
+          <a class="nav-link" href="/<%= appName.toLowerCase() %>/android">Android</a>
         <% } %>
       </li>
       <li class="nav-item">
         <% if(platform === 'iOS'){ %>
-          <a class="nav-link active" href="ios">iOS</a>
+          <a class="nav-link active" href="/<%= appName.toLowerCase() %>/ios">iOS</a>
         <% } else { %>
-          <a class="nav-link" href="ios">iOS</a>
+          <a class="nav-link" href="/<%= appName.toLowerCase() %>/ios">iOS</a>
         <% } %>
       </li>
       <li class="nav-item">
         <% if(platform === 'Graph'){ %>
-          <a class="nav-link active" href="graph">Graph</a>
+          <a class="nav-link active" href="/<%= appName.toLowerCase() %>/graph">Graph</a>
         <% } else { %>
-          <a class="nav-link" href="graph">Graph</a>
+          <a class="nav-link" href="/<%= appName.toLowerCase() %>/graph">Graph</a>
         <% } %>
       </li>
       <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="">Export
         <span class="caret"></span></a>
         <ul class="dropdown-content dropdown-menu">
-          <li><a href="csv"><big>csv</big></a></li>
-          <li><a href="json"><big>json</big></a></li>
-          <li><a href="xml"><big>xml</big></a></li>
+          <li><a href="/<%= appName.toLowerCase() %>/csv"><big>csv</big></a></li>
+          <li><a href="/<%= appName.toLowerCase() %>/json"><big>json</big></a></li>
+          <li><a href="/<%= appName.toLowerCase() %>/xml"><big>xml</big></a></li>
         </ul>
       </li>
     </ul>
