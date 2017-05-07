@@ -1,9 +1,9 @@
-var dateLib = require('date-and-time');
-var gplay = require('google-play-scraper');
-var Review = require('./review');
-var async = require('async');
-var LocaleHelper = require('./localeHelper');
-var localeHelper = new LocaleHelper();
+const dateLib = require('date-and-time');
+const gplay = require('google-play-scraper');
+const Review = require('./review');
+const async = require('async');
+const LocaleHelper = require('./localeHelper');
+const localeHelper = new LocaleHelper();
 
 function convertDateStringToDate(dateString) {
 	dateLib.locale('en');
@@ -36,6 +36,12 @@ function convertDateStringToDate(dateString) {
 		return date;
 	}
 
+	dateLib.locale('sr');
+	date = dateLib.parse(dateString, 'D MMMM YYYY', true);
+	if (Object.prototype.toString.call(date) === '[object Date]') {
+		return date;
+	}
+
 	console.error('Date string could not be parsed: ' + dateString);
 	return null;
 }
@@ -58,7 +64,7 @@ function fetchReviewsForLanguage(appId, lang, header, callback) {
 }
 
 function fetchReviewSet(appId, lang, header, page, completion) {
-	var review_array = [];
+	const review_array = [];
 	gplay.reviews({
 		appId: appId,
 		page: page,
@@ -71,10 +77,10 @@ function fetchReviewSet(appId, lang, header, page, completion) {
 			return;
 		}
 		apps.forEach(function (json) {
-			var review = parseReview(json, appId, header, lang);
+			const review = parseReview(json, appId, header, lang);
 			review_array.push(review);
 		});
-		var more = review_array.length >= 40;
+		const more = review_array.length >= 40;
 		completion(review_array, more);
 	}).catch(function (e) {
 		console.error('There was an error fetching the reviews!' + " " + e);
@@ -83,9 +89,9 @@ function fetchReviewSet(appId, lang, header, page, completion) {
 }
 
 function parseReview(json, appId, header, lang) {
-	var deviceInfo = {};
-	var appInfo = {};
-	var reviewInfo = {};
+	const deviceInfo = {};
+	const appInfo = {};
+	const reviewInfo = {};
 
 	appInfo.id = appId;
 	deviceInfo.platform = 'Android';
@@ -101,10 +107,10 @@ function parseReview(json, appId, header, lang) {
 		reviewInfo.developerComment = json.replyText;
 	}
 	if (json.replyDate) {
-		var replyDateToParse = json.replyDate.replace('.', '').replace(',', '');
+		const replyDateToParse = json.replyDate.replace('.', '').replace(',', '');
 		reviewInfo.developerCommentDateTime = convertDateStringToDate(replyDateToParse);
 	}
-	var dateStringToParse = json.date.replace('.', '').replace(',', '');
+	const dateStringToParse = json.date.replace('.', '').replace(',', '');
 	reviewInfo.dateTime = convertDateStringToDate(dateStringToParse);
 	return new Review(deviceInfo, appInfo, reviewInfo);
 }
@@ -119,8 +125,8 @@ module.exports = class AndroidScraper {
 			appId: this.config.androidId,
 			cache: false
 		}).then(function (app) {
-			var numberOfReviews = parseInt(app.reviews);
-			var averageRating = parseFloat(app.score);
+			const numberOfReviews = parseInt(app.reviews);
+			const averageRating = parseFloat(app.score);
 			callback(numberOfReviews, averageRating);
 		}).catch(function (error) {
 			console.log(error);
@@ -129,11 +135,9 @@ module.exports = class AndroidScraper {
 	}
 
 	fetchReviews(completion) {
-		var self = this;
+		const self = this;
 		var review_array = [];
-		var numberOfReviews = 0.0;
-		var averageRating = 0.0;
-		var functions = [];
+		const functions = [];
 		this.config.languages.forEach(function (language) {
 			functions.push(function (callback) {
 				localeHelper.getLanguage(language, function (languageHeader) {

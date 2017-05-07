@@ -1,7 +1,7 @@
 module.exports = class GraphDrawer {
 
 	dayAverageArray(map) {
-		var array = [];
+		const array = [];
 		for (var key in map.dayAverages) {
 			array.push(map.dayAverages[key]);
 		}
@@ -9,14 +9,14 @@ module.exports = class GraphDrawer {
 	}
 
 	dayTotalsArray(map) {
-		var array = [];
+		const array = [];
 		for (var key in map.dayTotals) {
 			array.push(map.dayTotals[key]);
 		}
 		return array;
 	}
 	dayWalkingDayAveragesArray(map) {
-		var array = [];
+		const array = [];
 		for (var key in map.walkingDayAverages) {
 			array.push(map.walkingDayAverages[key]);
 		}

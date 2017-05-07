@@ -1,7 +1,7 @@
-var hash = require('object-hash');
-var dateLib = require('date-and-time');
-var androidDevices = require('android-device-list');
-var androidVersions = require('android-versions');
+const hash = require('object-hash');
+const dateLib = require('date-and-time');
+const androidDevices = require('android-device-list');
+const androidVersions = require('android-versions');
 
 module.exports = class Review {
 
@@ -34,7 +34,7 @@ module.exports = class Review {
 	getHumanFriendlyDeviceMetaData() {
 		if (this.deviceInfo.deviceMetadata) {
 			var text = "";
-			var metadata = this.deviceInfo.deviceMetadata;
+			const metadata = this.deviceInfo.deviceMetadata;
 			for (var key in metadata) {
 				if (metadata.hasOwnProperty(key)) {
 					text += (key + ": " + metadata[key] + "\n");
@@ -65,7 +65,7 @@ module.exports = class Review {
 	}
 
 	getRatingText() {
-		var ratingText = this.reviewInfo.rating == 1 ? 'star' : 'stars';
+		const ratingText = this.reviewInfo.rating == 1 ? 'star' : 'stars';
 		return this.reviewInfo.rating + ' ' + ratingText;
 	}
 
@@ -80,7 +80,7 @@ module.exports = class Review {
 	}
 
 	getDeviceModelInfo() {
-		var deviceName = androidDevices.getDevicesByDeviceId(this.deviceInfo.device);
+		const deviceName = androidDevices.getDevicesByDeviceId(this.deviceInfo.device);
 		if (deviceName[0]) {
 			return deviceName[0].brand + ', ' + deviceName[0].name + '(' + this.deviceInfo.device + ')';
 		}
@@ -89,11 +89,11 @@ module.exports = class Review {
 
 	getDeviceVersionInfo() {
 		if (this.deviceInfo.osVersion) {
-			var osData = androidVersions.get(this.deviceInfo.osVersion);
+			const osData = androidVersions.get(this.deviceInfo.osVersion);
 			var osName = this.deviceInfo.osVersion;
 			if (osData) {
 				osName = osData.name;
-				var osNumber = osData.semver;
+				const osNumber = osData.semver;
 				return osName + '(' + osNumber + ')';
 			}
 		}
@@ -108,7 +108,8 @@ module.exports = class Review {
 		return {
 			'deviceInfo': this.deviceInfo,
 			'appInfo': this.appInfo,
-			'reviewInfo': this.reviewInfo
+			'reviewInfo': this.reviewInfo,
+			'oldReview': this.oldReviewInfo ? this.oldReviewInfo : {}
 		};
 	}
 

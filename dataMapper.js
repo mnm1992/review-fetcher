@@ -1,9 +1,9 @@
-var dateLib = require('date-and-time');
-var ReviewJSONDB = require('./reviewJSONDB');
-var reviewDB = new ReviewJSONDB();
+const dateLib = require('date-and-time');
+const ReviewJSONDB = require('./reviewJSONDB');
+const reviewDB = new ReviewJSONDB();
 
 Date.prototype.addDays = function (days) {
-	var dat = new Date(this.valueOf());
+	const dat = new Date(this.valueOf());
 	dat.setDate(dat.getDate() + days);
 	return dat;
 };
@@ -20,7 +20,7 @@ module.exports = class DataMapper {
 	}
 
 	getDates(startDate, stopDate) {
-		var dateArray = [];
+		const dateArray = [];
 		var currentDate = startDate;
 		while (currentDate <= stopDate) {
 			dateArray.push(new Date(currentDate));
@@ -30,11 +30,11 @@ module.exports = class DataMapper {
 	}
 
 	fetchReviews(config, callback) {
-		var self = this;
+		const self = this;
 		reviewDB.getReviews(config, 'Android', function (reviewsAndroid) {
 			reviewDB.getReviews(config, 'iOS', function (reviewsIos) {
-				var reviews = reviewsAndroid.concat(reviewsIos);
-				var map = self.createMap(reviews);
+				const reviews = reviewsAndroid.concat(reviewsIos);
+				const map = self.createMap(reviews);
 				map.dayAverages = self.dayAverages(map.reviewMap);
 				map.dayTotals = self.dayTotals(map.reviewMap);
 				map.walkingDayAverages = self.walkingDayAverages(map.reviewMap);
@@ -46,8 +46,8 @@ module.exports = class DataMapper {
 	createEmptyMap(start, stop) {
 		start.setHours(0, 0, 0, 0);
 		stop.setHours(0, 0, 0, 0);
-		var map = {};
-		var dates = this.getDates(start, stop);
+		const map = {};
+		const dates = this.getDates(start, stop);
 		dates.forEach(function (date) {
 			map[date] = [];
 		});
@@ -56,11 +56,11 @@ module.exports = class DataMapper {
 
 	createMap(reviews) {
 		reviews.sort(this.sorter);
-		var lastDate = reviews[reviews.length - 1].reviewInfo.dateTime;
-		var firstDate = reviews[0].reviewInfo.dateTime;
-		var map = this.createEmptyMap(firstDate, lastDate);
+		const lastDate = reviews[reviews.length - 1].reviewInfo.dateTime;
+		const firstDate = reviews[0].reviewInfo.dateTime;
+		const map = this.createEmptyMap(firstDate, lastDate);
 		reviews.forEach(function (review) {
-			var date = review.reviewInfo.dateTime;
+			const date = review.reviewInfo.dateTime;
 			date.setHours(0, 0, 0, 0);
 			map[date].push(review);
 		});
@@ -72,7 +72,7 @@ module.exports = class DataMapper {
 	}
 
 	walkingDayAverages(map) {
-		var averageMap = {};
+		const averageMap = {};
 		var total = 0;
 		var count = 0;
 		var iosTotal = 0;
@@ -80,7 +80,7 @@ module.exports = class DataMapper {
 		var androidTotal = 0;
 		var androidCount = 0;
 		for (var key in map) {
-			var array = map[key];
+			const array = map[key];
 			count += array.length;
 			array.forEach(function (review) {
 				total += review.reviewInfo.rating;
@@ -98,11 +98,11 @@ module.exports = class DataMapper {
 	}
 
 	dayAverages(map) {
-		var averageMap = {};
+		const averageMap = {};
 		for (var key in map) {
-			var array = map[key];
+			const array = map[key];
 			var total = 0;
-			var count = array.length;
+			const count = array.length;
 			var iosTotal = 0;
 			var iosCount = 0;
 			var androidTotal = 0;
@@ -123,13 +123,13 @@ module.exports = class DataMapper {
 	}
 
 	dayTotals(map) {
-		var totalMap = {};
+		const totalMap = {};
 		for (var key in map) {
 			var total = 0;
 			var iosTotal = 0;
 			var androidTotal = 0;
-			var array = map[key];
-			var count = array.length;
+			const array = map[key];
+			const count = array.length;
 			array.forEach(function (review) {
 				total += 1;
 				if (review.deviceInfo.platform === 'iOS') {

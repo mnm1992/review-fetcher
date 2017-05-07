@@ -42,17 +42,17 @@
     }
 
     function drawDayAveragesChart() {
-      var data = new google.visualization.DataTable();
+      const data = new google.visualization.DataTable();
       data.addColumn('date', 'Date');
       data.addColumn('number', 'Android rating');
       data.addColumn('number', 'iOS rating');
       data.addColumn('number', 'rating');
-      var allRows = <%- JSON.stringify(dayAverages) %>;
+      const allRows = <%- JSON.stringify(dayAverages) %>;
 
       data.addRows(mapToDecentMap(allRows));
 
-      var total = <%- dayAverages.length %>;
-      var options = {
+      const total = <%- dayAverages.length %>;
+      const options = {
         title: 'Day averages',
         curveType: 'none',
         legend: {
@@ -72,22 +72,22 @@
           format: 'dd/MM/yyyy',
         }
       };
-      var chart = new google.visualization.ColumnChart(document.getElementById('dayAverages'));
+      const chart = new google.visualization.ColumnChart(document.getElementById('dayAverages'));
       chart.draw(data, options);
     }
 
     function drawDayTotalsChart() {
-      var data = new google.visualization.DataTable();
+      const data = new google.visualization.DataTable();
       data.addColumn('date', 'Date');
       data.addColumn('number', 'Android total');
       data.addColumn('number', 'iOS total');
       data.addColumn('number', 'total');
 
-      var allRows = <%- JSON.stringify(dayTotals) %>;
+      const allRows = <%- JSON.stringify(dayTotals) %>;
       data.addRows(mapToDecentMap(allRows));
-      var total = <%- dayTotals.length %>
+      const total = <%- dayTotals.length %>
 
-      var options = {
+      const options = {
         title: 'Day totals',
         curveType: 'none',
         legend: {
@@ -103,22 +103,22 @@
           format: 'dd/MM/yyyy',
         }
       };
-      var chart = new google.visualization.ColumnChart(document.getElementById('dayTotals'));
+      const chart = new google.visualization.ColumnChart(document.getElementById('dayTotals'));
       chart.draw(data, options);
     }
 
     function drawDayWalkingDayAveragesChart() {
-      var data = new google.visualization.DataTable();
+      const data = new google.visualization.DataTable();
       data.addColumn('date', 'Date');
       data.addColumn('number', 'Android rating');
       data.addColumn('number', 'iOS rating');
       data.addColumn('number', 'rating');
 
-      var allRows = <%- JSON.stringify(walkingDayAverages) %>;
+      const allRows = <%- JSON.stringify(walkingDayAverages) %>;
       data.addRows(mapToDecentMap(allRows));
-      var total = <%- walkingDayAverages.length %>
+      const total = <%- walkingDayAverages.length %>
 
-      var options = {
+      const options = {
         title: 'Walking day averages',
         curveType: 'none',
         legend: {
@@ -135,7 +135,7 @@
           ticks: [0, 1, 2, 3, 4, 5],
         }
       };
-      var chart = new google.visualization.LineChart(document.getElementById('walkingDayAverages'));
+      const chart = new google.visualization.LineChart(document.getElementById('walkingDayAverages'));
       chart.draw(data, options);
     }
   </script>

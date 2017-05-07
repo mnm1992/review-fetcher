@@ -1,4 +1,4 @@
-var CountryLanguage = require('country-language');
+const CountryLanguage = require('country-language');
 
 function languageArrayToString(languages) {
   var text = '';
@@ -11,10 +11,10 @@ function languageArrayToString(languages) {
 module.exports = class LocaleHelper {
 
   getCountryAndLanguage(isoCode, callback) {
-    var splitIsoArray = isoCode.split('_');
-    var langString = splitIsoArray[0];
-    var countryString = splitIsoArray[1];
-    var self = this;
+    const splitIsoArray = isoCode.split('_');
+    const langString = splitIsoArray[0];
+    const countryString = splitIsoArray[1];
+    const self = this;
     self.getCountry(countryString, function(country) {
       self.getLanguage(langString, function(language) {
         callback(country, language);

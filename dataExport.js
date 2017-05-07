@@ -1,13 +1,13 @@
-var ReviewJSONDB = require('./reviewJSONDB');
-var reviewDB = new ReviewJSONDB();
-var X2JS = require('x2js');
-var x2js = new X2JS();
-var json2csv = require('json2csv');
+const ReviewJSONDB = require('./reviewJSONDB');
+const reviewDB = new ReviewJSONDB();
+const X2JS = require('x2js');
+const x2js = new X2JS();
+const json2csv = require('json2csv');
 
 module.exports = class DataExport {
 
 	exportJSON(config, completion) {
-		var reviewArray = [];
+		const reviewArray = [];
 		reviewDB.getAllReviews(config, function (reviews) {
 			reviews.forEach(function (review) {
 				reviewArray.push(review.getJSON());
@@ -17,7 +17,7 @@ module.exports = class DataExport {
 	}
 
 	exportXML(config, completion) {
-		var reviewArray = [];
+		const reviewArray = [];
 		reviewDB.getAllReviews(config, function (reviews) {
 			reviews.forEach(function (review) {
 				reviewArray.push(review.getJSON());
@@ -31,7 +31,7 @@ module.exports = class DataExport {
 	}
 
 	exportCSV(config, completion) {
-		var reviewArray = [];
+		const reviewArray = [];
 		var fields = [];
 		var fieldNames = [];
 		if (config.androidAuthentication) {

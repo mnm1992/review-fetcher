@@ -1,33 +1,34 @@
-var express = require('express');
-var app = express();
-var DataExport = require('./dataExport');
-var dataExport = new DataExport();
-var ReviewJSONDB = require('./reviewJSONDB');
-var reviewDB = new ReviewJSONDB();
-var DataMapper = require('./dataMapper');
-var dataMapper = new DataMapper();
-var GraphDrawer = require('./graphDrawer');
-var graphDrawer = new GraphDrawer();
-var AndroidFetcher = require('./androidFetcher');
-var configs = require('./configs');
-var fs = require('fs');
+const express = require('express');
+const DataExport = require('./dataExport');
+const dataExport = new DataExport();
+const ReviewJSONDB = require('./reviewJSONDB');
+const reviewDB = new ReviewJSONDB();
+const DataMapper = require('./dataMapper');
+const dataMapper = new DataMapper();
+const GraphDrawer = require('./graphDrawer');
+const graphDrawer = new GraphDrawer();
+const AndroidFetcher = require('./androidFetcher');
+const configs = require('./configs');
+const fs = require('fs');
+const compression = require('compression');
+const app = express();
+app.use(compression());
+app.set('view engine', 'ejs');
 
 function constructAppPage(config, response) {
-  console.time('Preparing the ' + config.appName +' page');
+  console.time('Preparing the ' + config.appName + ' page');
   reviewDB.getAllReviews(config, function(reviews) {
-    androidAverage(config, function(numberOfAndroidReviews, averageAndroidRating) {
-      iosAverage(reviews, function(numberOfiOSReviews, averageiOSRating) {
-        var totalReviews = numberOfiOSReviews + numberOfAndroidReviews;
-        var average = ((numberOfiOSReviews * averageiOSRating) + (numberOfAndroidReviews * averageAndroidRating)) / totalReviews;
-        response.render('reviews', {
-          appName: config.appName,
-          platform: '',
-          numberOfReviews: totalReviews,
-          averageScore: average,
-          reviews: reviews
-        });
-        console.timeEnd('Preparing the ' + config.appName +' page');
+    reviewDB.getRating(config, function(ratingJSON) {
+      const totalReviews = ratingJSON.iosTotal + ratingJSON.androidTotal;
+      const average = ((ratingJSON.iosTotal * ratingJSON.iosAverage) + (ratingJSON.androidTotal * ratingJSON.androidAverage)) / totalReviews;
+      response.render('reviews', {
+        appName: config.appName,
+        platform: '',
+        numberOfReviews: totalReviews?totalReviews:0,
+        averageScore: average?average:0,
+        reviews: reviews
       });
+      console.timeEnd('Preparing the ' + config.appName + ' page');
     });
   });
 }
@@ -35,12 +36,12 @@ function constructAppPage(config, response) {
 function constructAndroidPage(config, response) {
   console.time('Preparing the Android page');
   reviewDB.getReviews(config, 'Android', function(reviews) {
-    androidAverage(config, function(numberOfReviews, averageRating) {
+		reviewDB.getRating(config, function(ratingJSON) {
       response.render('reviews', {
         appName: config.appName,
         platform: 'Android',
-        numberOfReviews: numberOfReviews,
-        averageScore: averageRating,
+        numberOfReviews: ratingJSON.androidTotal?ratingJSON.androidTotal:0,
+        averageScore: ratingJSON.androidAverage?ratingJSON.androidAverage:0,
         reviews: reviews
       });
       console.timeEnd('Preparing the Android page');
@@ -51,12 +52,12 @@ function constructAndroidPage(config, response) {
 function constructIOSPage(config, response) {
   console.time('Preparing the iOS page');
   reviewDB.getReviews(config, 'iOS', function(reviews) {
-    iosAverage(reviews, function(numberOfReviews, averageRating) {
+		reviewDB.getRating(config, function(ratingJSON) {
       response.render('reviews', {
         appName: config.appName,
         platform: 'iOS',
-        numberOfReviews: numberOfReviews,
-        averageScore: averageRating,
+        numberOfReviews: ratingJSON.iosTotal?ratingJSON.iosTotal:0,
+        averageScore: ratingJSON.iosAverage?ratingJSON.iosAverage:0,
         reviews: reviews
       });
       console.timeEnd('Preparing the iOS page');
@@ -79,29 +80,29 @@ function constructGraphPage(config, response) {
 }
 
 function androidAverage(config, completion) {
-  var androidFetcher = new AndroidFetcher(config);
+  const androidFetcher = new AndroidFetcher(config);
   androidFetcher.fetchRatings(function(numberOfReviews, averageRating) {
     completion(numberOfReviews, averageRating);
   });
 }
 
 function iosAverage(reviews, completion) {
-	var reviewCount = 0;
+  var reviewCount = 0;
   var totalScore = 0;
   reviews.forEach(function(review) {
-		if(review.deviceInfo.platform === 'iOS'){
-    	totalScore += parseInt(review.reviewInfo.rating);
-			reviewCount += 1;
-		}
+    if (review.deviceInfo.platform === 'iOS') {
+      totalScore += parseInt(review.reviewInfo.rating);
+      reviewCount += 1;
+    }
   });
-  var averageRating = totalScore / reviewCount;
+  const averageRating = totalScore / reviewCount;
   completion(reviewCount, averageRating);
 }
 
 function constructJSONDump(config, response) {
   console.time('Exporting JSON');
   dataExport.exportJSON(config, function(data, fileName) {
-    sendFile(data, fileName, 'application/json', response)
+    sendFile(data, fileName, 'application/json', response);
     console.timeEnd('Exporting JSON');
   });
 }
@@ -109,7 +110,7 @@ function constructJSONDump(config, response) {
 function constructXMLDump(config, response) {
   console.time('Exporting XML');
   dataExport.exportXML(config, function(data, fileName) {
-    sendFile(data, fileName, 'text/xml', response)
+    sendFile(data, fileName, 'text/xml', response);
     console.timeEnd('Exporting XML');
   });
 }
@@ -117,7 +118,7 @@ function constructXMLDump(config, response) {
 function constructCSVDump(config, response) {
   console.time('Exporting csv');
   dataExport.exportCSV(config, function(data, fileName) {
-    sendFile(data, fileName, 'text/csv', response)
+    sendFile(data, fileName, 'text/csv', response);
     console.timeEnd('Exporting csv');
   });
 }
@@ -132,10 +133,10 @@ function notFound(response, errorMessage) {
 }
 
 function sendImage(name, response) {
-  var filePath = '.' + name;
+  const filePath = '.' + name;
   fs.readFile(filePath, function(error, content) {
     if (error) {
-      var errorMessage = 'Error: ' + error + '\nFile path: ' + filePath;
+      const errorMessage = 'Error: ' + error + '\nFile path: ' + filePath;
       notFound(response, errorMessage);
       return;
     }
@@ -156,12 +157,12 @@ function sendFile(data, fileName, content, response) {
 }
 
 app.get('/:app/:platform', function(request, response) {
-  var config = configs.configForApp(request.params.app.toLowerCase());
+  const config = configs.configForApp(request.params.app.toLowerCase());
   if (config === null) {
     notFound(response, 'proposition not found');
     return;
   }
-  var allowedPlatforms = ['logo.png', 'ios', 'android', 'graph', 'json', 'xml', 'csv'];
+  const allowedPlatforms = ['logo.png', 'ios', 'android', 'graph', 'json', 'xml', 'csv'];
   if (!allowedPlatforms.includes(request.params.platform.toLowerCase())) {
     notFound(response, 'platform not found');
     return;
@@ -184,7 +185,7 @@ app.get('/:app/:platform', function(request, response) {
 });
 
 app.get('/:app', function(request, response) {
-  var config = configs.configForApp(request.params.app.toLowerCase());
+  const config = configs.configForApp(request.params.app.toLowerCase());
   if (config === null) {
     notFound(response, 'proposition not found');
     return;
@@ -197,5 +198,4 @@ app.get('/ugrow/images/favicon.png', function(req, res) {
   sendImage(req.url, res);
 });
 
-app.set('view engine', 'ejs');
 app.listen(process.env.PORT || 8000, null);

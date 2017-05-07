@@ -1,9 +1,9 @@
-var async = require('async');
-var request = require('request');
-var XMLParser = require('xml2js');
-var Review = require('./review');
-var LocaleHelper = require('./localeHelper');
-var localeHelper = new LocaleHelper();
+const async = require('async');
+const request = require('request');
+const XMLParser = require('xml2js');
+const Review = require('./review');
+const LocaleHelper = require('./localeHelper');
+const localeHelper = new LocaleHelper();
 
 module.exports = class IOSFetcher {
 
@@ -12,10 +12,10 @@ module.exports = class IOSFetcher {
 	}
 
 	fetchReviews(completion) {
-		var self = this;
+		const self = this;
 
 		self.review_array = [];
-		var fetchActions = [];
+		const fetchActions = [];
 
 		self.config.countries.forEach(function (country) {
 			fetchActions.push(function (callback) {
@@ -37,8 +37,8 @@ module.exports = class IOSFetcher {
 	}
 
 	fetchReviewsForCountry(country, completion) {
-		var self = this;
-		var review_array = [];
+		const self = this;
+		const review_array = [];
 		request(self.getRequestURLForCountry(country), function (error, response, body) {
 			if (error || response.statusCode != 200) {
 				completion(null, []);
@@ -63,14 +63,14 @@ module.exports = class IOSFetcher {
 	}
 
 	parseResponseForCountry(review, country, completion) {
-		var self = this;
-		var rating = parseFloat(review['im:rating']);
+		const self = this;
+		const rating = parseFloat(review['im:rating']);
 		if (!rating) {
 			return;
 		}
-		var deviceInfo = {};
-		var appInfo = {};
-		var reviewInfo = {};
+		const deviceInfo = {};
+		const appInfo = {};
+		const reviewInfo = {};
 
 		reviewInfo.id = review.id[0];
 		reviewInfo.text = review.content[0]._;

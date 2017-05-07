@@ -1,8 +1,8 @@
-var gplay = require('google-play-scraper');
-var google = require('googleapis');
-var Review = require('./review');
-var LocaleHelper = require('./localeHelper');
-var localeHelper = new LocaleHelper();
+const gplay = require('google-play-scraper');
+const google = require('googleapis');
+const Review = require('./review');
+const LocaleHelper = require('./localeHelper');
+const localeHelper = new LocaleHelper();
 
 module.exports = class AndroidFetcher {
 	constructor(config) {
@@ -27,8 +27,8 @@ module.exports = class AndroidFetcher {
 	}
 
 	fetchNextSetOfReviews(options, completion) {
-		var self = this;
-		var androidpublisher = google.androidpublisher('v2');
+		const self = this;
+		const androidpublisher = google.androidpublisher('v2');
 		androidpublisher.reviews.list(options, function (err, resp) {
 			if (err) {
 				console.log(err);
@@ -41,7 +41,7 @@ module.exports = class AndroidFetcher {
 				return;
 			}
 
-			var review_array = [];
+			const review_array = [];
 			resp.reviews.forEach(function (json) {
 				self.parseReviewJSON(json, function (review) {
 					review_array.push(review);
@@ -57,15 +57,15 @@ module.exports = class AndroidFetcher {
 
 
 	fetchReviews(completion) {
-		var self = this;
+		const self = this;
 		var response_list = [];
-		var options = {
+		const options = {
 			auth: self.getAuth(),
 			packageName: self.config.androidId,
 			maxResults: 100,
 		};
-		var reviews_received = function (review_array, next_token) {
-			response_list.concat(review_array);
+		const reviews_received = function (review_array, next_token) {
+			response_list = response_list.concat(review_array);
 			if (next_token && review_array.length > 0) {
 				options.token = next_token;
 				self.fetchNextSetOfReviews(options, reviews_received);
@@ -77,7 +77,7 @@ module.exports = class AndroidFetcher {
 	}
 
 	getAuth() {
-		var jwtClient = new google.auth.JWT(
+		const jwtClient = new google.auth.JWT(
 			this.androidAuthentication.client_email,
 			null,
 			this.androidAuthentication.private_key, ['https://www.googleapis.com/auth/androidpublisher'],
@@ -87,16 +87,16 @@ module.exports = class AndroidFetcher {
 	}
 
 	parseReviewJSON(json, completion) {
-		var self = this;
-		var deviceInfo = {};
-		var appInfo = {};
-		var reviewInfo = {};
+		const self = this;
+		const deviceInfo = {};
+		const appInfo = {};
+		const reviewInfo = {};
 
 		appInfo.id = self.config.androidId;
 		appInfo.version = json.comments[0].userComment.appVersionName;
 		appInfo.versionCode = json.comments[0].userComment.appVersionCode;
 
-		var reviewText = json.comments[0].userComment.text.split('\t');
+		const reviewText = json.comments[0].userComment.text.split('\t');
 		reviewInfo.id = json.reviewId;
 		reviewInfo.title = reviewText[0];
 		reviewInfo.text = reviewText[1];
