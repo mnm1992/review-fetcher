@@ -6,4 +6,7 @@ CREATE TABLE reviewJSON(
   reviewInfo JSON NOT NULL,
   oldReviewInfo JSON
 );
-ALTER TABLE reviewJSON ADD COLUMN oldReviewInfo JSON;
+CREATE TABLE reviewmetadata(
+  id TEXT PRIMARY KEY NOT NULL,
+  json JSON NOT NULL
+);

@@ -55,6 +55,9 @@ module.exports = class DataMapper {
 	}
 
 	createMap(reviews) {
+		if (!reviews || reviews.length === 0) {
+			return {};
+		}
 		reviews.sort(this.sorter);
 		const lastDate = reviews[reviews.length - 1].reviewInfo.dateTime;
 		const firstDate = reviews[0].reviewInfo.dateTime;

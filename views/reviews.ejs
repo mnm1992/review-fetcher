@@ -4,27 +4,119 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta charset="utf-8" />
-  <title><%- appName %> <%- platform %> Reviews</title>
-  <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+  <title><%- tabTitle %></title>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.2.0/milligram.min.css">
   <link rel="icon" type="image/png" href="/<%= appName.toLowerCase() %>/images/favicon.png">
+  <style style="text/css">
+    ul.rating-list {
+      margin:3rem 0;
+      padding:0;
+      list-style-type: none;
+      float:left;
+    }
+
+    div.left-of-rating-bar {
+      width:13.5rem;
+      float:left;
+    }
+
+    div.rating-bar {
+      background:#EFF1F2;
+      width:30rem;
+      height:0.8rem;
+      float:left;
+      margin:0.75rem 1.2rem;
+    }
+
+    div.rating-bar-fill {
+      background:#606C76;
+      width:10rem;
+      height:0.8rem;
+    }
+
+    span.star-icons {
+      margin-right: 0.2rem;
+      letter-spacing: 0.2rem;
+    }
+    span.unfilled-star {
+      opacity: 0.1;
+    }
+
+    img.rating-review-icon {
+      width:1.1em;
+      height:1.1em;
+      margin-top:-0.2rem;
+    }
+
+    div.rating-average {
+      float:left;
+      margin:3.4rem 0;
+      margin-right:3rem;
+      text-align:center;
+    }
+
+    p.rating-amount {
+        margin:0;
+    }
+
+    h1.rating-average-title {
+      font-size: 7.6rem;
+      margin-bottom:0.2rem;
+    }
+
+    img.total-icon {
+      width:1.6rem;
+      height:1.6rem;
+      margin-right:0.8rem;
+    }
+
+  </style>
 </head>
 
 <body>
   <%- include('partials/navbar') %>
 
   <div class="container">
-    <h2><%- appName %> <%- platform %></h2>
-    <h3><%- numberOfReviews %> reviews with average rating of <%- averageScore.toFixed(2); %></h3>
+    <% totalReviews =  (typeof totalReviews != 'undefined') ? totalReviews : 0; %>
+    <% averageReviews =  (typeof averageReviews != 'undefined') ? averageReviews : 0; %>
+    <% reviewHistogram =  (typeof reviewHistogram != 'undefined') ? reviewHistogram : {}; %>
+    <% totalRatings =  (typeof totalRatings != 'undefined') ? totalRatings : 0; %>
+    <% averageRatings =  (typeof averageRatings != 'undefined') ? averageRatings : 0; %>
+    <% ratingHistogram =  (typeof ratingHistogram != 'undefined') ? ratingHistogram : {}; %>
+    <h2><%- pageTitle %></h2>
+    <div class="rating-average">
+      <h1 class="rating-average-title"><%- averageRatings.toFixed(2); %></h1>
+      <p class="rating-amount"><img src="/person.svg" class="total-icon" alt="person-icon" /><%- totalRatings %> in total</p>
+      <p class="rating-amount"><img src="/message.svg" class="total-icon" alt="message-icon" /><%- totalReviews %> in total</p>
+    </div>
+    <ul class="rating-list">
+      <% for (var i = 5; i >= 1; i--) { %>
+        <li>
+          <div class="left-of-rating-bar">
+            <span class="star-icons">
+              <span class="unfilled-star"><% for (var us = i; us < 5; us++) { %>★<% } %></span><% for (var fs = 0; fs < i; fs++) { %>★<% } %>
+            </span>
+            <span class="star-rating-text"><%= ratingHistogram['' + i] %></span>
+          </div>
+          <div class="rating-bar">
+              <div class="rating-bar-fill" style="width:<%= (ratingHistogram['' + i] / totalRatings * 100) %>%"></div>
+          </div>
+          <img src="/message.svg" class="rating-review-icon" alt="Reviews with description" />
+          <span class="review-ratings-text"><%= reviewHistogram['' + i] %></span>
+          </li>
+        <li>
+      <% } %>
+    </ul>
+    <div style="clear:both;"></div>
+
     <% reviews.forEach(function(review){ %>
         <h5><%- review.getRatingText(); %> on <%- review.getFormattedReviewDate(); %></h5>
         <p>
-            <%- review.reviewInfo.title?"<em>\"" + review.reviewInfo.title + "\"</em> - " : ""; %><%- review.reviewInfo.author ? review.reviewInfo.author : ""; %><br>
+            <% const title = review.reviewInfo.title?"<em>\"" + review.reviewInfo.title + "\"</em> - " : "" %>
+            <%- title %><%- review.reviewInfo.author %><br>
             <%- review.reviewInfo.text %><br>
             <% if (review.appInfo.version && review.appInfo.versionCode) { %>
               <small>v <%- review.appInfo.version %> , <%- review.appInfo.versionCode %>, <%- review.getLocationText(); %></small><br>
@@ -43,10 +135,12 @@
               <%- review.reviewInfo.developerComment %>
             </em></blockquote>
             <% } %>
-
         </p>
     <% }); %>
   </div>
+  <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
   <script>
     $(function () {
       $('[data-toggle="tooltip"]').tooltip({ container: 'body' })

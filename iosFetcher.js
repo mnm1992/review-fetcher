@@ -77,6 +77,7 @@ module.exports = class IOSFetcher {
 		reviewInfo.title = review.title[0];
 		reviewInfo.author = review.author ? review.author[0].name[0] : false;
 		reviewInfo.dateTime = new Date(review.updated);
+		reviewInfo.hasTime = true;
 		reviewInfo.rating = rating;
 		reviewInfo.source = 'RSS';
 		appInfo.id = self.config.iosId;

@@ -127,7 +127,7 @@ module.exports = class AndroidScraper {
 		}).then(function (app) {
 			const numberOfReviews = parseInt(app.reviews);
 			const averageRating = parseFloat(app.score);
-			callback(numberOfReviews, averageRating);
+			callback(numberOfReviews, averageRating, app.histogram);
 		}).catch(function (error) {
 			console.log(error);
 			callback(0, 0);

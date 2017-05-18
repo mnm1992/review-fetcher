@@ -9,10 +9,7 @@ module.exports = class Review {
 		this.appInfo = appInfo;
 		this.reviewInfo = reviewInfo;
 		this.deviceInfo = deviceInfo;
-
-		if (deviceInfo.deviceMetadata && typeof deviceInfo.deviceMetadata === 'string') {
-			deviceInfo.deviceMetadata = JSON.parse(deviceInfo.deviceMetadata);
-		}
+		this.oldReviewInfo = {};
 
 		if (!reviewInfo.author) {
 			reviewInfo.author = 'Anonymous';
@@ -109,7 +106,7 @@ module.exports = class Review {
 			'deviceInfo': this.deviceInfo,
 			'appInfo': this.appInfo,
 			'reviewInfo': this.reviewInfo,
-			'oldReview': this.oldReviewInfo ? this.oldReviewInfo : {}
+			'oldReview': this.oldReviewInfo
 		};
 	}
 
