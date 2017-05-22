@@ -140,51 +140,50 @@ function addRatingsToDB(config, ratingJSON, callback) {
 }
 
 function shareOnSlack(config, reviews, callback) {
-	if (process.env.PORT === undefined) {
-		console.log('Not posting to Slack since this is localhost');
-		callback();
-		return;
-	}
+    if (process.env.PORT === undefined) {
+        console.log('Not posting to Slack since this is localhost');
+        callback();
+        return;
+    }
+    if (!config.slackHook || !config.slackChannel || !config.slackBot) {
+        console.log('No slack hook configured for ' + config.appName);
+        callback();
+        return;
+    }
 
-	if (!config.slackHook || !config.slackChannel || !config.slackBot) {
-		console.log('No slack hook configured for ' + config.appName);
-		callback();
-		return;
-	}
+    const webhookUri = config.slackHook;
+    if (reviews.length === 0) {
+        console.log('There are no new reviews to post to slack');
+        callback();
+        return;
+    }
 
-	const webhookUri = config.slackHook;
-	if (reviews.length === 0) {
-		console.log('There are no new reviews to post to slack');
-		callback();
-		return;
-	}
+    slack.setWebhook(webhookUri);
 
-	console.log('Sharing ' + reviews.length + ' on slack');
-	var text = '';
-	reviews.forEach(function (entry) {
-		text += entry.createReviewSlackText();
-	});
+    console.log('Sharing ' + reviews.length + ' on slack');
+    reviews.forEach(function (entry) {
+        var text = '';
+        text += entry.createReviewSlackText();
+        if (!text) {
+            console.log('Nothing to post to Slack: ');
+            return;
+        }
+        console.time('Posting to slack');
+        slack.webhook({
+            channel: config.slackChannel,
+            username: config.slackBot,
+            text: text
+        }, function (err, response) {
+            if (err) {
+                console.error('Error posting reviews to Slack: ' + err);
+            } else {
+                console.log('Succesfully posted reviews to slack');
+            }
+            console.timeEnd('Posting to slack');
+        });
 
-	if (!text) {
-		console.log('Nothing to post to Slack: ');
-		callback();
-		return;
-	}
-	console.time('Posting to slack');
-	slack.setWebhook(webhookUri);
-	slack.webhook({
-		channel: config.slackChannel,
-		username: config.slackBot,
-		text: text
-	}, function (err, response) {
-		if (err) {
-			console.error('Error posting reviews to Slack: ' + err);
-		} else {
-			console.log('Succesfully posted reviews to slack');
-		}
-		console.timeEnd('Posting to slack');
-		callback();
-	});
+    });
+    callback();
 }
 
 function start(completion) {
