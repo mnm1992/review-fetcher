@@ -1,3 +1,4 @@
+const dateLib = require('date-and-time');
 const express = require('express');
 const DataExport = require('./dataExport');
 const dataExport = new DataExport();
@@ -16,6 +17,7 @@ const app = express();
 app.use(compression());
 app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/public'));
+const footer = '';
 
 function constructVersionPage(config, platform, version, response) {
 	console.time('Preparing the version page for ' + version);
@@ -23,21 +25,23 @@ function constructVersionPage(config, platform, version, response) {
 		reviewDB.getRating(config, function (ratingJSON) {
 			reviewHelper.appAverage(reviews, function (totalReviews, averageReviews) {
 				const histogram = reviewHelper.calculateHistogram(reviews);
-        const title = platform.toLowerCase() === 'android' ? 'Android' : 'iOS';
+				const title = platform.toLowerCase() === 'android' ? 'Android' : 'iOS';
 				response.render('reviews', {
 					appName: config.appName,
-          tabTitle: config.appName + ' ' + title + ' ' + version + ' Reviews',
+					tabTitle: config.appName + ' ' + title + ' ' + version + ' Reviews',
 					pageTitle: config.appName + ' ' + title + ' ' + version,
-          page: 'Versions',
+					page: 'Versions',
+					footer: footer,
 					iosVersions: ratingJSON.iosVersions,
-          androidVersions: ratingJSON.androidVersions,
-          totalRatings: totalReviews ? totalReviews : 0,
-          averageRatings: averageReviews ? averageReviews : 0,
-          totalReviews: totalReviews ? totalReviews : 0,
+					androidVersions: ratingJSON.androidVersions,
+					countries: ratingJSON.countries,
+					totalRatings: totalReviews ? totalReviews : 0,
+					averageRatings: averageReviews ? averageReviews : 0,
+					totalReviews: totalReviews ? totalReviews : 0,
 					averageReviews: averageReviews ? averageReviews : 0,
-          ratingHistogram: histogram,
-          reviewHistogram: histogram,
-          reviews: reviews
+					ratingHistogram: histogram,
+					reviewHistogram: histogram,
+					reviews: reviews
 				});
 				console.timeEnd('Preparing the version page for ' + version);
 			});
@@ -53,21 +57,23 @@ function constructAppPage(config, response) {
 				const totalRatings = ratingJSON.iosTotal + ratingJSON.androidTotal;
 				const averageRatings = ((ratingJSON.iosTotal * ratingJSON.iosAverage) + (ratingJSON.androidTotal * ratingJSON.androidAverage)) / totalRatings;
 				const reviewHistogram = reviewHelper.calculateHistogram(reviews);
-				const ratingHistogram = reviewHelper.mergeHistograms(ratingJSON.androidHistogram, reviewHelper.calculateHistogramForPlatform(reviews, 'ios'));
+				const ratingHistogram = reviewHelper.mergeHistograms(ratingJSON.androidHistogram, reviewHelper.calculateHistogram(reviews, 'ios'));
 				response.render('reviews', {
-          appName: config.appName,
-          tabTitle: config.appName + ' Reviews',
-          pageTitle: config.appName,
-          page: 'Home',
+					appName: config.appName,
+					tabTitle: config.appName + ' Reviews',
+					pageTitle: config.appName,
+					page: 'Home',
+					footer: footer,
 					iosVersions: ratingJSON.iosVersions,
-          androidVersions: ratingJSON.androidVersions,
-          totalRatings: totalRatings ? totalRatings : 0,
-          averageRatings: averageRatings ? averageRatings : 0,
-          totalReviews: totalReviews ? totalReviews : 0,
-          averageReviews: averageReviews ? averageReviews : 0,
-          ratingHistogram: ratingHistogram,
-          reviewHistogram: reviewHistogram,
-          reviews: reviews
+					androidVersions: ratingJSON.androidVersions,
+					countries: ratingJSON.countries,
+					totalRatings: totalRatings ? totalRatings : 0,
+					averageRatings: averageRatings ? averageRatings : 0,
+					totalReviews: totalReviews ? totalReviews : 0,
+					averageReviews: averageReviews ? averageReviews : 0,
+					ratingHistogram: ratingHistogram,
+					reviewHistogram: reviewHistogram,
+					reviews: reviews
 				});
 				console.timeEnd('Preparing the ' + config.appName + ' page');
 			});
@@ -81,21 +87,29 @@ function constructAndroidPage(config, response) {
 		reviewDB.getRating(config, function (ratingJSON) {
 			reviewHelper.appAverage(reviews, function (totalReviews, averageReviews) {
 				const histogram = reviewHelper.calculateHistogram(reviews);
-				const ratingHistogram = ratingJSON.androidHistogram ? ratingJSON.androidHistogram : {'1':0, '2':0, '3':0, '4':0, '5':0};
+				const ratingHistogram = ratingJSON.androidHistogram ? ratingJSON.androidHistogram : {
+					'1': 0,
+					'2': 0,
+					'3': 0,
+					'4': 0,
+					'5': 0
+				};
 				response.render('reviews', {
-          appName: config.appName,
-          tabTitle: config.appName + ' Android Reviews',
-          pageTitle: config.appName + ' Android',
-          page: 'Android',
-          iosVersions: ratingJSON.iosVersions,
-          androidVersions: ratingJSON.androidVersions,
-          totalRatings: ratingJSON.androidTotal ? ratingJSON.androidTotal : 0,
-          averageRatings: ratingJSON.androidAverage ? ratingJSON.androidAverage : 0,
-          totalReviews: totalReviews ? totalReviews : 0,
-          averageReviews: averageReviews ? averageReviews : 0,
-          ratingHistogram: ratingHistogram,
-          reviewHistogram: histogram,
-          reviews: reviews
+					appName: config.appName,
+					tabTitle: config.appName + ' Android Reviews',
+					pageTitle: config.appName + ' Android',
+					page: 'Android',
+					footer: footer,
+					iosVersions: ratingJSON.iosVersions,
+					androidVersions: ratingJSON.androidVersions,
+					countries: ratingJSON.countries,
+					totalRatings: ratingJSON.androidTotal ? ratingJSON.androidTotal : 0,
+					averageRatings: ratingJSON.androidAverage ? ratingJSON.androidAverage : 0,
+					totalReviews: totalReviews ? totalReviews : 0,
+					averageReviews: averageReviews ? averageReviews : 0,
+					ratingHistogram: ratingHistogram,
+					reviewHistogram: histogram,
+					reviews: reviews
 				});
 				console.timeEnd('Preparing the Android page');
 			});
@@ -109,19 +123,21 @@ function constructIOSPage(config, response) {
 		reviewDB.getRating(config, function (ratingJSON) {
 			const histogram = reviewHelper.calculateHistogram(reviews);
 			response.render('reviews', {
-        appName: config.appName,
-        tabTitle: config.appName + ' iOS Reviews',
-        pageTitle: config.appName + ' iOS',
-        page: 'iOS',
+				appName: config.appName,
+				tabTitle: config.appName + ' iOS Reviews',
+				pageTitle: config.appName + ' iOS',
+				page: 'iOS',
+				footer: footer,
 				iosVersions: ratingJSON.iosVersions,
 				androidVersions: ratingJSON.androidVersions,
-        totalRatings: ratingJSON.iosTotal ? ratingJSON.iosTotal : 0,
-        averageRatings: ratingJSON.iosAverage ? ratingJSON.iosAverage : 0,
-        totalReviews: ratingJSON.iosTotal ? ratingJSON.iosTotal : 0,
-        averageReviews: ratingJSON.iosAverage ? ratingJSON.iosAverage : 0,
-        ratingHistogram: histogram,
-        reviewHistogram: histogram,
-        reviews: reviews
+				countries: ratingJSON.countries,
+				totalRatings: ratingJSON.iosTotal ? ratingJSON.iosTotal : 0,
+				averageRatings: ratingJSON.iosAverage ? ratingJSON.iosAverage : 0,
+				totalReviews: ratingJSON.iosTotal ? ratingJSON.iosTotal : 0,
+				averageReviews: ratingJSON.iosAverage ? ratingJSON.iosAverage : 0,
+				ratingHistogram: histogram,
+				reviewHistogram: histogram,
+				reviews: reviews
 			});
 			console.timeEnd('Preparing the iOS page');
 		});
@@ -133,13 +149,15 @@ function constructGraphPage(config, response) {
 	dataMapper.fetchReviews(config, function (map) {
 		reviewDB.getRating(config, function (ratingJSON) {
 			response.render('graphs_page', {
-        appName: config.appName,
-        tabTitle: config.appName + ' Graph Reviews',
-        pageTitle: config.appName + ' Graph',
-        page: 'Graph',
-        iosVersions: ratingJSON.iosVersions,
-        androidVersions: ratingJSON.androidVersions,
-        dayAverages: graphDrawer.dayAverageArray(map),
+				appName: config.appName,
+				tabTitle: config.appName + ' Graph Reviews',
+				pageTitle: config.appName + ' Graph',
+				page: 'Graph',
+				footer: footer,
+				iosVersions: ratingJSON.iosVersions,
+				androidVersions: ratingJSON.androidVersions,
+				countries: ratingJSON.countries,
+				dayAverages: graphDrawer.dayAverageArray(map),
 				dayTotals: graphDrawer.dayTotalsArray(map),
 				walkingDayAverages: graphDrawer.dayWalkingDayAveragesArray(map)
 			});
@@ -211,19 +229,19 @@ app.get('/:app/:platform', function (request, response) {
 		notFound(response, 'proposition not found');
 		return;
 	}
-	const allowedPlatforms = ['logo.png', 'ios', 'android', 'graph'];
+	const allowedPlatforms = ['ios', 'android', 'graph', 'statistics'];
 	if (!allowedPlatforms.includes(request.params.platform.toLowerCase())) {
 		notFound(response, 'platform not found');
 		return;
 	}
-	if (request.params.platform.toLowerCase() === 'logo.png') {
-		sendImage("/ugrow/images/logo.png", response);
-	} else if (request.params.platform.toLowerCase() === 'ios') {
+	if (request.params.platform.toLowerCase() === 'ios') {
 		constructIOSPage(config, response);
 	} else if (request.params.platform.toLowerCase() === 'android') {
 		constructAndroidPage(config, response);
-	} else {
+	} else if (request.params.platform.toLowerCase() === 'graph') {
 		constructGraphPage(config, response);
+	} else {
+		constructStatsPage(config, response);
 	}
 });
 
@@ -264,6 +282,15 @@ app.get('/:app/export/:option', function (request, response) {
 	}
 });
 
+app.get('/:app/country/:countryCode', function (request, response) {
+	const config = configs.configForApp(request.params.app.toLowerCase());
+	if (config === null) {
+		notFound(response, 'proposition not found');
+		return;
+	}
+	const option = request.params.countryCode.toLowerCase();
+	constructCountryPage(config, option, response);
+});
 
 app.get('/:app', function (request, response) {
 	const config = configs.configForApp(request.params.app.toLowerCase());
@@ -272,11 +299,6 @@ app.get('/:app', function (request, response) {
 		return;
 	}
 	constructAppPage(config, response);
-});
-
-
-app.get('/ugrow/images/favicon.png', function (req, res) {
-	sendImage(req.url, res);
 });
 
 app.listen(process.env.PORT || 8000, null);

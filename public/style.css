@@ -1,5 +1,5 @@
-html, body {
-  background-color: #f3f3f3;
+div.card-deck {
+  margin-top:5rem;
 }
 
 div.card-error {
@@ -8,6 +8,11 @@ div.card-error {
   margin:2px;
   color:#fff;
   font-size: 0.75em;
+}
+
+td.trend {
+  border-left:1px solid #e1e1e1;
+  border-right:1px solid #e1e1e1;
 }
 
 div.card-error a {
@@ -20,15 +25,11 @@ div.card-error a:hover {
 
 div.card {
   background-color: #ffffff;
-  padding:0px;
+  padding:2rem;
   margin-bottom:18px;
   border-radius: 0;
-  box-shadow: 2px 2px 0px #eee;
+  box-shadow: 2px 2px 0px #fafafa;
   transition: box-shadow 0.3s ease;
-}
-
-div.card:hover {
-  box-shadow: 2px 2px 0px #ccc;
 }
 
 a {
@@ -82,4 +83,66 @@ ul.list-group {
 .topnav a.active {
     background-color: #4CAF50;
     color: white;
+}
+
+ul.rating-list {
+  margin:3rem 0;
+  padding:0;
+  list-style-type: none;
+  float:left;
+}
+
+div.left-of-rating-bar {
+  width:13.5rem;
+  float:left;
+}
+
+div.rating-bar {
+  background:#EFF1F2;
+  width:30rem;
+  height:0.8rem;
+  float:left;
+  margin:0.75rem 1.2rem;
+}
+
+div.rating-bar-fill {
+  background:#606C76;
+  width:10rem;
+  height:0.8rem;
+}
+
+span.star-icons {
+  margin-right: 0.2rem;
+  letter-spacing: 0.2rem;
+}
+span.unfilled-star {
+  opacity: 0.1;
+}
+
+img.rating-review-icon {
+  width:1.1em;
+  height:1.1em;
+  margin-top:-0.2rem;
+}
+
+div.rating-average {
+  float:left;
+  margin:3.4rem 0;
+  margin-right:3rem;
+  text-align:center;
+}
+
+p.rating-amount {
+    margin:0;
+}
+
+h1.rating-average-title {
+  font-size: 7.6rem;
+  margin-bottom:0.2rem;
+}
+
+img.total-icon {
+  width:1.6rem;
+  height:1.6rem;
+  margin-right:0.8rem;
 }

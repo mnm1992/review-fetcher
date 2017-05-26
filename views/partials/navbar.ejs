@@ -47,16 +47,17 @@ a:hover {
   <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
-  <% if(appName === 'uGrow'){ %>
-    <a class="navbar-brand" href="/<%= appName.toLowerCase() %>">
-      <img src="/ugrow/logo.png" width="30" height="30" alt="">
-    </a>
-  <% } %>
+
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav">
       <% const linkTypeAndroid = (page === 'Android') ? "nav-link active" : "nav-link"; %>
       <% const linkTypeIOS = (page === 'iOS') ? "nav-link active" : "nav-link"; %>
       <% const linkTypeGraph = (page === 'Graph') ? "nav-link active" : "nav-link"; %>
+      <% const linkTypeStatistics = (page === 'Statistics') ? "nav-link active" : "nav-link"; %>
+      <% const linkTypeHome = (page === 'Home') ? "nav-link active" : "nav-link"; %>
+      <li class="nav-item">
+        <a class="<%= linkTypeHome %>" href="/<%= appName.toLowerCase() %>">Home</a>
+      </li>
       <li class="nav-item">
         <a class="<%= linkTypeAndroid %>" href="/<%= appName.toLowerCase() %>/android">Android</a>
       </li>
@@ -65,6 +66,22 @@ a:hover {
       </li>
       <li class="nav-item">
         <a class="<%= linkTypeGraph %>" href="/<%= appName.toLowerCase() %>/graph">Graph</a>
+      </li>
+      <li class="nav-item">
+        <a class="<%= linkTypeStatistics %>" href="/<%= appName.toLowerCase() %>/statistics">Statistics</a>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="">Countries
+        <span class="caret"></span></a>
+        <ul class="dropdown-content dropdown-menu">
+          <% if ( typeof countries != 'undefined') { %>
+            <% 	countries.forEach(function (country) { %>
+            <% 	const countryCode = Object.keys(country)[0]; %>
+            <% 	const countryName = country[countryCode];  %>
+              <li><a href="/<%= appName.toLowerCase() %>/country/<%= countryCode.toLowerCase() %>"><big><%= countryName %></big></a></li>
+            <% 	}); %>
+          <% } %>
+        </ul>
       </li>
       <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="">Versions

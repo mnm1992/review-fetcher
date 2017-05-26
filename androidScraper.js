@@ -42,6 +42,12 @@ function convertDateStringToDate(dateString) {
 		return date;
 	}
 
+	dateLib.locale('zh-cn');
+	date = dateLib.parse(dateString, 'YYYY年M月D日', true);
+	if (Object.prototype.toString.call(date) === '[object Date]') {
+		return date;
+	}
+
 	console.error('Date string could not be parsed: ' + dateString);
 	return null;
 }

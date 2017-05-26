@@ -120,8 +120,8 @@ module.exports = class AndroidFetcher {
 			deviceInfo.country = country;
 			deviceInfo.language = language;
 			const splitIsoArray = deviceInfo.isoCode.split('_');
-			deviceInfo.languageCode = splitIsoArray[0];
-			deviceInfo.countryCode = splitIsoArray[1];
+			deviceInfo.languageCode = splitIsoArray[0].toLowerCase();
+			deviceInfo.countryCode = splitIsoArray[1].toLowerCase();
 			completion(new Review(deviceInfo, appInfo, reviewInfo));
 		});
 	}

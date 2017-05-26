@@ -15,6 +15,14 @@ module.exports = class Review {
 			reviewInfo.author = 'Anonymous';
 		}
 
+		if (deviceInfo.languageCode) {
+			deviceInfo.languageCode = deviceInfo.languageCode.toLowerCase();
+		}
+
+		if (deviceInfo.countryCode) {
+			deviceInfo.countryCode = deviceInfo.countryCode.toLowerCase();
+		}
+
 		if (typeof reviewInfo.dateTime === 'string') {
 			reviewInfo.dateTime = new Date(reviewInfo.dateTime);
 		}

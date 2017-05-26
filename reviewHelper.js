@@ -1,3 +1,5 @@
+const emojiFlags = require('emoji-flags');
+
 function removeDuplicates(input, prioritisedType) {
 	const output = [];
 	const reviewMap = {};
@@ -29,7 +31,93 @@ function mergeReviews(dbReview, fetchedReview) {
 	return laterReview;
 }
 
+function dictionaryToArray(dictionary) {
+	const array = [];
+	Object.keys(dictionary).forEach(function (key) {
+		array.push(dictionary[key]);
+	});
+	return array;
+}
+
 module.exports = {
+	constructLanguagesMap: function (reviews) {
+		const languageCodes = [];
+		const appLanguages = {};
+		reviews.forEach(function (review) {
+			if (review.deviceInfo.languageCode && !languageCodes.includes(review.deviceInfo.languageCode)) {
+				const codeLanguageMap = {
+					'languageCode': review.deviceInfo.languageCode,
+					'language': review.deviceInfo.language,
+					'total': 1,
+					'average': review.reviewInfo.rating
+				};
+				appLanguages[review.deviceInfo.languageCode] = codeLanguageMap
+				languageCodes.push(review.deviceInfo.languageCode);
+			} else if (review.deviceInfo.languageCode) {
+				const oldTotal = appLanguages[review.deviceInfo.languageCode].total;
+				const oldAverage = appLanguages[review.deviceInfo.languageCode].average;
+				const newTotal = oldTotal + 1;
+				const newAverage = ((oldAverage * oldTotal) + review.reviewInfo.rating) / newTotal;
+				appLanguages[review.deviceInfo.languageCode].total = newTotal;
+				appLanguages[review.deviceInfo.languageCode].average = newAverage;
+			}
+		});
+		return dictionaryToArray(appLanguages);
+	},
+
+	constructCountriesMap: function (reviews, platform) {
+		const overide =platform?false:true;
+		const countryCodes = [];
+		const appCountries = {};
+		reviews.forEach(function (review) {
+			const correctPlatform = overide || (review.deviceInfo.platform.toLowerCase() === platform.toLowerCase());
+			if (correctPlatform && review.deviceInfo.countryCode && !countryCodes.includes(review.deviceInfo.countryCode)) {
+				const codeCountryMap = {
+					'flag': emojiFlags.countryCode(review.deviceInfo.countryCode).emoji,
+					'countryCode': review.deviceInfo.countryCode,
+					'country': review.deviceInfo.country,
+					'total': 1,
+					'average': review.reviewInfo.rating
+				};
+				appCountries[review.deviceInfo.countryCode] = codeCountryMap
+				countryCodes.push(review.deviceInfo.countryCode);
+			} else if (correctPlatform && review.deviceInfo.countryCode) {
+				const oldTotal = appCountries[review.deviceInfo.countryCode].total;
+				const oldAverage = appCountries[review.deviceInfo.countryCode].average;
+				const newTotal = oldTotal + 1;
+				const newAverage = ((oldAverage * oldTotal) + review.reviewInfo.rating) / newTotal;
+				appCountries[review.deviceInfo.countryCode].total = newTotal;
+				appCountries[review.deviceInfo.countryCode].average = newAverage;
+			}
+		});
+		return dictionaryToArray(appCountries);
+	},
+
+	constructVersionMap: function (reviews) {
+		const versions = [];
+		const appVersions = {};
+		reviews.forEach(function (review) {
+			const title = review.deviceInfo.platform + ' ' + review.appInfo.version;
+			if (review.appInfo.version && !versions.includes(title)) {
+				const versionMap = {
+					'platform': review.deviceInfo.platform,
+					'version': review.appInfo.version,
+					'total': 1,
+					'average': review.reviewInfo.rating
+				};
+				appVersions[title] = versionMap;
+				versions.push(title);
+			} else if (review.appInfo.version) {
+				const oldTotal = appVersions[title].total;
+				const oldAverage = appVersions[title].average;
+				const newTotal = oldTotal + 1;
+				const newAverage = ((oldAverage * oldTotal) + review.reviewInfo.rating) / newTotal;
+				appVersions[title].total = newTotal;
+				appVersions[title].average = newAverage;
+			}
+		});
+		return appVersions;
+	},
 
 	mergeHistograms: function (histogramA, histogramB) {
 		if (!histogramA && !histogramB) {
@@ -55,7 +143,8 @@ module.exports = {
 		return histogramA;
 	},
 
-	calculateHistogram: function (reviews) {
+	calculateHistogram: function (reviews, platform) {
+		const overide =platform?false:true;
 		const histogram = {
 			1: 0,
 			2: 0,
@@ -64,21 +153,8 @@ module.exports = {
 			5: 0
 		};
 		reviews.forEach(function (review) {
-			histogram[review.reviewInfo.rating] = histogram[review.reviewInfo.rating] += 1;
-		});
-		return histogram;
-	},
-
-	calculateHistogramForPlatform: function (reviews, platform) {
-		const histogram = {
-			1: 0,
-			2: 0,
-			3: 0,
-			4: 0,
-			5: 0
-		};
-		reviews.forEach(function (review) {
-			if (review.deviceInfo.platform.toLowerCase() === platform.toLowerCase()) {
+			const correctPlatform = overide || (review.deviceInfo.platform.toLowerCase() === platform.toLowerCase());
+			if(correctPlatform){
 				histogram[review.reviewInfo.rating] = histogram[review.reviewInfo.rating] += 1;
 			}
 		});
@@ -96,10 +172,11 @@ module.exports = {
 		completion(reviewCount, averageRating);
 	},
 
-	appVersionsForPlatform: function (reviews, platform) {
+	appVersions: function (reviews,platform) {
+		const overide =platform?false:true;
 		const appVersionArray = [];
 		reviews.forEach(function (review) {
-			const correctPlatform = review.deviceInfo.platform.toLowerCase() === platform.toLowerCase();
+			const correctPlatform = overide || (review.deviceInfo.platform.toLowerCase() === platform.toLowerCase());
 			const hasVersion = review.appInfo.version;
 			const versionNotInArrayYet = !appVersionArray.includes(review.appInfo.version);
 			if (hasVersion && versionNotInArrayYet && correctPlatform) {
@@ -112,17 +189,21 @@ module.exports = {
 		return appVersionArray;
 	},
 
-	appVersions: function (reviews) {
-		const appVersionArray = [];
+	appCountries: function (reviews) {
+		const countryCodes = [];
+		const appCountries = [];
 		reviews.forEach(function (review) {
-			if (review.appInfo.version && !appVersionArray.includes(review.appInfo.version)) {
-				appVersionArray.push(review.appInfo.version);
+			if (review.deviceInfo.countryCode && !countryCodes.includes(review.deviceInfo.countryCode)) {
+				const codeCountryMap = {};
+				codeCountryMap[review.deviceInfo.countryCode] = review.deviceInfo.country;
+				appCountries.push(codeCountryMap);
+				countryCodes.push(review.deviceInfo.countryCode);
 			}
 		});
-		appVersionArray.sort((obj1, obj2) => {
-			return obj2 > obj1
+		appCountries.sort((obj1, obj2) => {
+			return Object.keys(obj1)[0] > Object.keys(obj2)[0]
 		});
-		return appVersionArray;
+		return appCountries;
 	},
 
 	mergeReviewsFromArrays: function (reviewsFromDB, reviewsFetched) {

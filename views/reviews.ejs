@@ -10,70 +10,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.2.0/milligram.min.css">
   <link rel="icon" type="image/png" href="/<%= appName.toLowerCase() %>/images/favicon.png">
-  <style style="text/css">
-    ul.rating-list {
-      margin:3rem 0;
-      padding:0;
-      list-style-type: none;
-      float:left;
-    }
-
-    div.left-of-rating-bar {
-      width:13.5rem;
-      float:left;
-    }
-
-    div.rating-bar {
-      background:#EFF1F2;
-      width:30rem;
-      height:0.8rem;
-      float:left;
-      margin:0.75rem 1.2rem;
-    }
-
-    div.rating-bar-fill {
-      background:#606C76;
-      width:10rem;
-      height:0.8rem;
-    }
-
-    span.star-icons {
-      margin-right: 0.2rem;
-      letter-spacing: 0.2rem;
-    }
-    span.unfilled-star {
-      opacity: 0.1;
-    }
-
-    img.rating-review-icon {
-      width:1.1em;
-      height:1.1em;
-      margin-top:-0.2rem;
-    }
-
-    div.rating-average {
-      float:left;
-      margin:3.4rem 0;
-      margin-right:3rem;
-      text-align:center;
-    }
-
-    p.rating-amount {
-        margin:0;
-    }
-
-    h1.rating-average-title {
-      font-size: 7.6rem;
-      margin-bottom:0.2rem;
-    }
-
-    img.total-icon {
-      width:1.6rem;
-      height:1.6rem;
-      margin-right:0.8rem;
-    }
-
-  </style>
+  <link rel="stylesheet" href="/style.css" />
 </head>
 
 <body>
@@ -146,6 +83,6 @@
       $('[data-toggle="tooltip"]').tooltip({ container: 'body' })
     })
   </script>
+  <%- include('partials/footer') %>
 </body>
-
 </html>

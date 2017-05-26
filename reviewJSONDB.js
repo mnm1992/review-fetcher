@@ -146,6 +146,10 @@ module.exports = class ReviewJSONDB {
 		upsertAverageRating(app, ratingJSON, callback);
 	}
 
+	getReviewsForCountry(config, country, callback) {
+		getAllReviewsWithWhere(config, '(appid = $1 OR appid = $2) AND deviceInfo->>\'countryCode\' = $3', [config.androidId, config.iosId, country], callback);
+	}
+
 	getReviewsForVersion(config, platform, version, callback) {
 		const appId = (platform.toLowerCase() === 'android') ? config.androidId : config.iosId;
 		getAllReviewsWithWhere(config, 'appid = $1 AND appInfo->>\'version\' = $2', [appId, version], callback);
@@ -169,11 +173,14 @@ module.exports = class ReviewJSONDB {
 		console.time('Fetched all reviews');
 		this.getAllReviews(config, function (reviewsFromDB) {
 			console.timeEnd('Fetched all reviews');
+			console.time('Determining all countries');
+			const countries = reviewHelper.appCountries(reviewsFromDB);
+			console.timeEnd('Determining all countries');
 			console.time('Determining android versions');
-			const androidVersions = reviewHelper.appVersionsForPlatform(reviewsFromDB, 'android');
+			const androidVersions = reviewHelper.appVersions(reviewsFromDB, 'android');
 			console.timeEnd('Determining android versions');
 			console.time('Determining ios versions');
-			const iosVersions = reviewHelper.appVersionsForPlatform(reviewsFromDB, 'ios');
+			const iosVersions = reviewHelper.appVersions(reviewsFromDB, 'ios');
 			console.timeEnd('Determining ios versions');
 			console.time('Checking for duplicates');
 			const cleanReviews = reviewHelper.mergeReviewsFromArrays(reviewsFromDB, reviewsFetched);
@@ -187,7 +194,7 @@ module.exports = class ReviewJSONDB {
 				console.time('Updated all reviews');
 				blukUpdate(cleanReviews.reviewsToUpdate, function () {
 					console.timeEnd('Updated all reviews');
-					callback(cleanReviews.newReviews, androidVersions, iosVersions);
+					callback(cleanReviews.newReviews, countries, androidVersions, iosVersions);
 				});
 			});
 		});

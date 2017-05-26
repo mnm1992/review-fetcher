@@ -11,6 +11,24 @@ module.exports = class IOSFetcher {
 		this.config = config;
 	}
 
+	getLastPage(json) {
+		var pageNumber = 1;
+		json.forEach(function (dictionary) {
+			const type = dictionary['$']['rel'];
+			if (type === 'last') {
+				const url = dictionary['$']['href'];
+				const nextPageUrl = url.split('?');
+				const urlParts = nextPageUrl[0].split('/');
+				urlParts.forEach(function (urlPart) {
+					if (urlPart.includes('page')) {
+						pageNumber = urlPart.split('=')[1];
+					}
+				});
+			}
+		});
+		return pageNumber;
+	}
+
 	fetchReviews(completion) {
 		const self = this;
 
@@ -39,26 +57,34 @@ module.exports = class IOSFetcher {
 	fetchReviewsForCountry(country, completion) {
 		const self = this;
 		const review_array = [];
-		request(self.getRequestURLForCountry(country), function (error, response, body) {
+		const responseHandler = function (error, page, response, body) {
 			if (error || response.statusCode != 200) {
-				completion(null, []);
+				completion(null, review_array);
 				return;
 			}
-
 			XMLParser.parseString(body, function (err, result) {
-				var entries = result.feed.entry;
+				const last = self.getLastPage(result.feed.link);
+				const entries = result.feed.entry;
 				if (entries === undefined) {
-					completion(null, []);
+					completion(null, review_array);
 					return;
 				}
-
 				entries.forEach(function (reviewJS) {
 					self.parseResponseForCountry(reviewJS, country, function (review) {
 						review_array.push(review);
 					});
 				});
-				completion(null, review_array);
+				if (page === last) {
+					completion(null, review_array);
+				} else {
+					request(self.getRequestURLForCountry(country, page + 1), function (error, response, body) {
+						responseHandler(error, page + 1, response, body);
+					});
+				}
 			});
+		}
+		request(self.getRequestURLForCountry(country, 1), function (error, response, body) {
+			responseHandler(error, 1, response, body)
 		});
 	}
 
@@ -91,7 +117,7 @@ module.exports = class IOSFetcher {
 		});
 	}
 
-	getRequestURLForCountry(country) {
-		return 'https://itunes.apple.com/' + country + '/rss/customerreviews/page=1/id=' + this.config.iosId + '/sortby=mostrecent/xml';
+	getRequestURLForCountry(country, page) {
+		return 'https://itunes.apple.com/' + country + '/rss/customerreviews/page=' + page + '/id=' + this.config.iosId + '/sortby=mostrecent/xml';
 	}
 };

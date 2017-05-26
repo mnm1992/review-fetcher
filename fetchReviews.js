@@ -66,9 +66,10 @@ function checkForNewReviews(config, completion) {
 			});
 		},
 		function (callback) {
-			addReviewsToDB(config, allReviews, function(newReviews, androidVersions, iosVersions){
+			addReviewsToDB(config, allReviews, function (newReviews, countries, androidVersions, iosVersions) {
 				ratingJSON.androidVersions = androidVersions;
 				ratingJSON.iosVersions = iosVersions;
+				ratingJSON.countries = countries;
 				shareOnSlack(config, newReviews, callback);
 			});
 		},
@@ -125,9 +126,9 @@ function fetchAndroidReviews(config, callback) {
 
 function addReviewsToDB(config, reviews, callback) {
 	console.time('Storing data in db');
-	reviewDB.addNewReviews(config, reviews, function (newReviews, androidVersions, iosVersions) {
+	reviewDB.addNewReviews(config, reviews, function (newReviews, countries, androidVersions, iosVersions) {
 		console.timeEnd('Storing data in db');
-		callback(newReviews, androidVersions, iosVersions);
+		callback(newReviews, countries, androidVersions, iosVersions);
 	});
 }
 
@@ -145,6 +146,7 @@ function shareOnSlack(config, reviews, callback) {
         callback();
         return;
     }
+
     if (!config.slackHook || !config.slackChannel || !config.slackBot) {
         console.log('No slack hook configured for ' + config.appName);
         callback();
