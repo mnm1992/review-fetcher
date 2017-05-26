@@ -19,6 +19,63 @@ app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/public'));
 const footer = '';
 
+function constructStatsPage(config, response) {
+	console.time('Preparing the stats ' + config.appName + ' page');
+	reviewDB.getAllReviews(config, function (reviews) {
+		reviewDB.getRating(config, function (ratingJSON) {
+			reviewHelper.appAverage(reviews, function (totalReviews, averageReviews) {
+				response.render('statistics', {
+					appName: config.appName,
+					tabTitle: config.appName + ' Statistics',
+					pageTitle: config.appName + ' Statistics',
+					page: 'Statistics',
+					footer: footer,
+					iosVersions: ratingJSON.iosVersions,
+					androidVersions: ratingJSON.androidVersions,
+					countries: ratingJSON.countries,
+					countryStats: reviewHelper.constructCountriesMap(reviews),
+					androidCountryStats: reviewHelper.constructCountriesMap(reviews, 'android'),
+					iosCountryStats: reviewHelper.constructCountriesMap(reviews, 'ios'),
+					versionStats: reviewHelper.constructVersionMap(reviews),
+					languageStats: reviewHelper.constructLanguagesMap(reviews)
+				});
+				console.timeEnd('Preparing the stats ' + config.appName + ' page');
+			});
+		});
+	});
+}
+
+
+function constructCountryPage(config, country, response) {
+	console.time('Preparing the country page for ' + country);
+	reviewDB.getReviewsForCountry(config, country, function (reviews) {
+		reviewDB.getRating(config, function (ratingJSON) {
+			reviewHelper.appAverage(reviews, function (totalReviews, averageReviews) {
+				const histogram = reviewHelper.calculateHistogram(reviews);
+				response.render('reviews', {
+					appName: config.appName,
+					tabTitle: config.appName + ' ' + country + ' Reviews',
+					pageTitle: config.appName + ' ' + country,
+					page: 'Countries',
+					footer: footer,
+					iosVersions: ratingJSON.iosVersions,
+					androidVersions: ratingJSON.androidVersions,
+					countries: ratingJSON.countries,
+					totalRatings: totalReviews ? totalReviews : 0,
+					averageRatings: averageReviews ? averageReviews : 0,
+					totalReviews: totalReviews ? totalReviews : 0,
+					averageReviews: averageReviews ? averageReviews : 0,
+					ratingHistogram: histogram,
+					reviewHistogram: histogram,
+					reviews: reviews
+				});
+				console.timeEnd('Preparing the country page for ' + country);
+			});
+		});
+	});
+}
+
+
 function constructVersionPage(config, platform, version, response) {
 	console.time('Preparing the version page for ' + version);
 	reviewDB.getReviewsForVersion(config, platform, version, function (reviews) {
