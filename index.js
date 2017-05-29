@@ -34,10 +34,11 @@ function constructStatsPage(config, response) {
 					androidVersions: ratingJSON.androidVersions,
 					countries: ratingJSON.countries,
 					countryStats: reviewHelper.constructCountriesMap(reviews),
-					androidCountryStats: reviewHelper.constructCountriesMap(reviews, 'android'),
-					iosCountryStats: reviewHelper.constructCountriesMap(reviews, 'ios'),
+					androidCountryStats: reviewHelper.constructCountriesMap(reviews,'android'),
+					iosCountryStats: reviewHelper.constructCountriesMap(reviews,'ios'),
 					versionStats: reviewHelper.constructVersionMap(reviews),
-					languageStats: reviewHelper.constructLanguagesMap(reviews)
+					languageStats: reviewHelper.constructLanguagesMap(reviews),
+					timingStats: reviewHelper.generateTimeReviewSummary(reviews)
 				});
 				console.timeEnd('Preparing the stats ' + config.appName + ' page');
 			});

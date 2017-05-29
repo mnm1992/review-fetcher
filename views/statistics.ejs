@@ -1,195 +1,47 @@
-<%
-function getColor(value){
-    //value from 0 to 1
-    var hue=((value)*80).toString(10);
-    return ["hsl(",hue,",100%,75%)"].join("");
-}
-%>
+<!DOCTYPE html>
+<html>
 
-  <!DOCTYPE html>
-  <html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" />
+  <title>
+    <%- tabTitle %>
+  </title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.2.0/milligram.min.css">
+  <link rel="icon" type="image/png" href="/<%= appName.toLowerCase() %>/images/favicon.png">
+  <link rel="stylesheet" href="/style.css" />
+</head>
 
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta charset="utf-8" />
-    <title>
-      <%- tabTitle %>
-    </title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.2.0/milligram.min.css">
-    <link rel="icon" type="image/png" href="/<%= appName.toLowerCase() %>/images/favicon.png">
-    <link rel="stylesheet" href="/style.css" />
-  </head>
-
-  <body>
-    <%- include('partials/navbar') %>
-      <div class="container">
-        <h2><%- pageTitle %></h2>
-        <div class="card-deck">
-          <div class="card">
-            <div class="card-block">
-              <h4 class="card-title">Versions</h4>
-              <table>
-                <tr>
-                  <th>Version</th>
-                  <th>Average</th>
-                  <th>#Reviews</th>
-                </tr>
-                <% const sortedVersionStats = Object.keys(versionStats).sort().reverse(); %>
-                  <% sortedVersionStats.forEach(function(key) { %>
-                    <% const versionData = versionStats[key]; %>
-                      <tr>
-                        <td>
-                          <%= key %>
-                        </td>
-                        <td class="trend" style="background: linear-gradient(to right, <%= getColor(versionData.average / 5) %> 0%, <%= getColor(versionData.average / 5) %> <%= (versionData.average / 5) * 100 %>%, transparent <%= (versionData.average / 5) * 100 %>%,  transparent <%= 100 - (versionData.average / 5) * 100 %>%);">
-                          <%= versionData.average.toFixed(2) %>
-                        </td>
-                        <td>
-                          <%= versionData.total %>
-                        </td>
-                      </tr>
-                      <% }); %>
-              </table>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-block">
-              <h4 class="card-title">Languages (Android only)</h4>
-              <table>
-                <tr>
-                  <th>Language</th>
-                  <th>Average</th>
-                  <th>#Reviews</th>
-                </tr>
-                <% languageStats.sort(function(x, y){ if (x.language < y.language) { return -1; } if (x.language > y.language) { return 1; } return 0; }); %>
-                  <% languageStats.forEach(function(languageData) { %>
-                    <tr>
-                      <td>
-                        <%= languageData.language %>
-                      </td>
-                      <td class="trend" style="background: linear-gradient(to right, <%= getColor(languageData.average / 5) %> 0%, <%= getColor(languageData.average / 5) %> <%= (languageData.average / 5) * 100 %>%, transparent <%= (languageData.average / 5) * 100 %>%,  transparent <%= 100 - (languageData.average / 5) * 100 %>%);">
-                        <%= languageData.average.toFixed(2) %>
-                      </td>
-                      <td>
-                        <%= languageData.total %>
-                      </td>
-                    </tr>
-                    <% }); %>
-              </table>
-            </div>
-          </div>
-          <% const hasAndroidCountries = androidCountryStats.length > 0; %>
-            <div class="card">
-              <div class="card-block">
-                <h4 class="card-title">Countries  <%= !hasAndroidCountries?'(iOS only)':'' %></h4>
-                <table>
-                  <tr>
-                    <th></th>
-                    <th>Country</th>
-                    <th>Average</th>
-                    <th>#Reviews</th>
-                  </tr>
-                  <% countryStats.sort(function(x, y){ if (x.country < y.country) { return -1; } if (x.country > y.country) { return 1; } return 0; }); %>
-                    <% countryStats.forEach(function(countryData) { %>
-                      <tr>
-                        <td>
-                          <%= countryData.flag %>
-                        </td>
-                        <td>
-                          <%= countryData.country %>
-                        </td>
-                        <% var ratingPercentage = (countryData.average / 5) * 100; %>
-                          <td class="trend" style="background: linear-gradient(to right, <%= getColor(countryData.average / 5) %> 0%, <%= getColor(countryData.average / 5) %> <%= (countryData.average / 5) * 100 %>%, transparent <%= (countryData.average / 5) * 100 %>%,  transparent <%= 100 - (countryData.average / 5) * 100 %>%);">
-                            <%= countryData.average.toFixed(2) %>
-                          </td>
-                          <td>
-                            <%= countryData.total %>
-                          </td>
-                      </tr>
-                      <% }); %>
-                </table>
-              </div>
-            </div>
-            <% if(hasAndroidCountries) { %>
-              <div class="card">
-                <div class="card-block">
-                  <h4 class="card-title">Countries Android%></h4>
-                  <table>
-                    <tr>
-                      <th></th>
-                      <th>Country</th>
-                      <th>Average</th>
-                      <th>#Reviews</th>
-                    </tr>
-                    <% androidCountryStats.sort(function(x, y){ if (x.country < y.country) { return -1; } if (x.country > y.country) { return 1; } return 0; }); %>
-                      <% androidCountryStats.forEach(function(countryData) { %>
-                        <tr>
-                          <td>
-                            <%= countryData.flag %>
-                          </td>
-                          <td>
-                            <%= countryData.country %>
-                          </td>
-                          <% var ratingPercentage = (countryData.average / 5) * 100; %>
-                            <td class="trend" style="background: linear-gradient(to right, <%= getColor(countryData.average / 5) %> 0%, <%= getColor(countryData.average / 5) %> <%= (countryData.average / 5) * 100 %>%, transparent <%= (countryData.average / 5) * 100 %>%,  transparent <%= 100 - (countryData.average / 5) * 100 %>%);">
-                              <%= countryData.average.toFixed(2) %>
-                            </td>
-                            <td>
-                              <%= countryData.total %>
-                            </td>
-                        </tr>
-                        <% }); %>
-                  </table>
-                </div>
-              </div>
-              <div class="card">
-                <div class="card-block">
-                  <h4 class="card-title">Countries iOS</h4>
-                  <table>
-                    <tr>
-                      <th></th>
-                      <th>Country</th>
-                      <th>Average</th>
-                      <th>#Reviews</th>
-                    </tr>
-                    <% iosCountryStats.sort(function(x, y){ if (x.country < y.country) { return -1; } if (x.country > y.country) { return 1; } return 0; }); %>
-                      <% iosCountryStats.forEach(function(countryData) { %>
-                        <tr>
-                          <td>
-                            <%= countryData.flag %>
-                          </td>
-                          <td>
-                            <%= countryData.country %>
-                          </td>
-                          <% var ratingPercentage = (countryData.average / 5) * 100; %>
-                            <td class="trend" style="background: linear-gradient(to right, <%= getColor(countryData.average / 5) %> 0%, <%= getColor(countryData.average / 5) %> <%= (countryData.average / 5) * 100 %>%, transparent <%= (countryData.average / 5) * 100 %>%,  transparent <%= 100 - (countryData.average / 5) * 100 %>%);">
-                              <%= countryData.average.toFixed(2) %>
-                            </td>
-                            <td>
-                              <%= countryData.total %>
-                            </td>
-                        </tr>
-                        <% }); %>
-                  </table>
-                </div>
-              </div>
-              <% } %>
-        </div>
-        <%- include('partials/footer') %>
+<body>
+  <%- include('partials/navbar') %>
+    <div class="container">
+      <h2><%- pageTitle %></h2>
+      <div class="card-deck">
+        <%- include('partials/timingSummaryCard') %>
+          <%- include('partials/versionCard') %>
+            <%- include('partials/languageCard') %>
+              <% const hasAndroidCountries = androidCountryStats.length > 0; %>
+                <%- include('partials/countryCard') %>
+                  <% if(hasAndroidCountries) { %>
+                    <%- include('partials/androidCountryCard') %>
+                      <%- include('partials/iosCountryCard') %>
+                        <% } %>
       </div>
-      <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
-      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
-      <script>
-        $(function() {
-          $('[data-toggle="tooltip"]').tooltip({
-            container: 'body'
-          })
+      <%- include('partials/footer') %>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+    <script>
+      $(function() {
+        $('[data-toggle="tooltip"]').tooltip({
+          container: 'body'
         })
-      </script>
-  </body>
+      })
+    </script>
+</body>
 
-  </html>
+</html>

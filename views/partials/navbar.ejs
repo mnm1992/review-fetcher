@@ -47,7 +47,11 @@ a:hover {
   <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
-
+  <% if(appName === 'uGrow'){ %>
+    <a class="navbar-brand" href="/<%= appName.toLowerCase() %>">
+      <img src="/ugrow/logo.png" width="30" height="30" alt="">
+    </a>
+  <% } %>
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav">
       <% const linkTypeAndroid = (page === 'Android') ? "nav-link active" : "nav-link"; %>
@@ -55,9 +59,11 @@ a:hover {
       <% const linkTypeGraph = (page === 'Graph') ? "nav-link active" : "nav-link"; %>
       <% const linkTypeStatistics = (page === 'Statistics') ? "nav-link active" : "nav-link"; %>
       <% const linkTypeHome = (page === 'Home') ? "nav-link active" : "nav-link"; %>
-      <li class="nav-item">
-        <a class="<%= linkTypeHome %>" href="/<%= appName.toLowerCase() %>">Home</a>
-      </li>
+      <% if(appName !== 'uGrow'){ %>
+        <li class="nav-item">
+          <a class="<%= linkTypeHome %>" href="/<%= appName.toLowerCase() %>">Home</a>
+        </li>
+      <% } %>
       <li class="nav-item">
         <a class="<%= linkTypeAndroid %>" href="/<%= appName.toLowerCase() %>/android">Android</a>
       </li>
