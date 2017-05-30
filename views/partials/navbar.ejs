@@ -1,5 +1,6 @@
 <!-- views/partials/navbar.ejs -->
 <style type="text/css">
+
 .dropdown-content {
     display: none;
     position: absolute;
@@ -16,49 +17,94 @@
     display: block;
 }
 
-.dropdown-content a:hover {background-color: #f1f1f1}
+.dropdown-content a:hover {
+  background-color: #f1f1f1;
+}
+
+.nav-item {
+  margin-bottom: 0;
+}
+
+a {
+  color: #00B083;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: #1295B2;
+  text-decoration: none;
+}
+
+.navbar {
+  padding: 8px 16px;
+  margin-bottom: 24px;
+}
 
 </style>
 
 <nav class="navbar navbar-toggleable-md navbar-inverse bg-inverse">
   <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-  <span class="navbar-toggler-icon"></span>
-</button>
-  <% if(appName === 'uGrow'){ %>
-    <a class="navbar-brand" href="/<%= appName.toLowerCase() %>">
-      <img src="/ugrow/logo.png" width="30" height="30" alt="">
-    </a>
-  <% } %>
+    <span class="navbar-toggler-icon"></span>
+  </button>
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav">
+      <% const linkTypeAndroid = (page === 'Android') ? "nav-link active" : "nav-link"; %>
+      <% const linkTypeIOS = (page === 'iOS') ? "nav-link active" : "nav-link"; %>
+      <% const linkTypeGraph = (page === 'Graph') ? "nav-link active" : "nav-link"; %>
+      <% const linkTypeStatistics = (page === 'Statistics') ? "nav-link active" : "nav-link"; %>
+      <% const linkTypeHome = (page === 'Home') ? "nav-link active" : "nav-link"; %>
       <li class="nav-item">
-        <% if(platform === 'Android'){ %>
-          <a class="nav-link active" href="/<%= appName.toLowerCase() %>/android">Android</a>
-        <% } else { %>
-          <a class="nav-link" href="/<%= appName.toLowerCase() %>/android">Android</a>
-        <% } %>
+        <a class="<%= linkTypeHome %>" href="/<%= appName.toLowerCase() %>">Home</a>
       </li>
       <li class="nav-item">
-        <% if(platform === 'iOS'){ %>
-          <a class="nav-link active" href="/<%= appName.toLowerCase() %>/ios">iOS</a>
-        <% } else { %>
-          <a class="nav-link" href="/<%= appName.toLowerCase() %>/ios">iOS</a>
-        <% } %>
+        <a class="<%= linkTypeAndroid %>" href="/<%= appName.toLowerCase() %>/android">Android</a>
       </li>
       <li class="nav-item">
-        <% if(platform === 'Graph'){ %>
-          <a class="nav-link active" href="/<%= appName.toLowerCase() %>/graph">Graph</a>
-        <% } else { %>
-          <a class="nav-link" href="/<%= appName.toLowerCase() %>/graph">Graph</a>
-        <% } %>
+        <a class="<%= linkTypeIOS %>" href="/<%= appName.toLowerCase() %>/ios">iOS</a>
+      </li>
+      <li class="nav-item">
+        <a class="<%= linkTypeGraph %>" href="/<%= appName.toLowerCase() %>/graph">Graph</a>
+      </li>
+      <li class="nav-item">
+        <a class="<%= linkTypeStatistics %>" href="/<%= appName.toLowerCase() %>/statistics">Statistics</a>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="">Countries
+        <span class="caret"></span></a>
+        <ul class="dropdown-content dropdown-menu">
+          <% if ( typeof countries != 'undefined') { %>
+            <% 	countries.forEach(function (country) { %>
+            <% 	const countryCode = Object.keys(country)[0]; %>
+            <% 	const countryName = country[countryCode];  %>
+              <li><a href="/<%= appName.toLowerCase() %>/country/<%= countryCode.toLowerCase() %>"><big><%= countryName %></big></a></li>
+            <% 	}); %>
+          <% } %>
+        </ul>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="">Versions
+        <span class="caret"></span></a>
+        <ul class="dropdown-content dropdown-menu">
+          <% if ( typeof androidVersions != 'undefined') { %>
+            <% 	androidVersions.forEach(function (version) { %>
+              <li><a href="/<%= appName.toLowerCase() %>/android/version/<%= version.toLowerCase() %>"><big>Android <%= version %></big></a></li>
+            <% 	}); %>
+          <% } %>
+          <% if ( typeof iosVersions != 'undefined') { %>
+            <% 	iosVersions.forEach(function (version) { %>
+              <li><a href="/<%= appName.toLowerCase() %>/ios/version/<%= version.toLowerCase() %>"><big>iOS <%= version %></big></a></li>
+            <% 	}); %>
+          <% } %>
+        </ul>
       </li>
       <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="">Export
         <span class="caret"></span></a>
         <ul class="dropdown-content dropdown-menu">
-          <li><a href="/<%= appName.toLowerCase() %>/csv"><big>csv</big></a></li>
-          <li><a href="/<%= appName.toLowerCase() %>/json"><big>json</big></a></li>
-          <li><a href="/<%= appName.toLowerCase() %>/xml"><big>xml</big></a></li>
+          <li><a href="/<%= appName.toLowerCase() %>/export/csv"><big>csv</big></a></li>
+          <li><a href="/<%= appName.toLowerCase() %>/export/json"><big>json</big></a></li>
+          <li><a href="/<%= appName.toLowerCase() %>/export/xml"><big>xml</big></a></li>
         </ul>
       </li>
     </ul>

@@ -1,0 +1,34 @@
+<%
+function getColor(value){
+    //value from 0 to 1
+    var hue=((value)*80).toString(10);
+    return ["hsl(",hue,",100%,75%)"].join("");
+}
+%>
+<div class="card">
+  <div class="card-block">
+    <h4 class="card-title">Versions</h4>
+    <table>
+      <tr>
+        <th>Version</th>
+        <th>Average</th>
+        <th>#Reviews</th>
+      </tr>
+      <% const sortedVersionStats = Object.keys(versionStats).sort().reverse(); %>
+        <% sortedVersionStats.forEach(function(key) { %>
+          <% const versionData = versionStats[key]; %>
+            <tr>
+              <td>
+                <%= key %>
+              </td>
+              <td class="trend" style="background: linear-gradient(to right, <%= getColor(versionData.average / 5) %> 0%, <%= getColor(versionData.average / 5) %> <%= (versionData.average / 5) * 100 %>%, transparent <%= (versionData.average / 5) * 100 %>%,  transparent <%= 100 - (versionData.average / 5) * 100 %>%);">
+                <%= versionData.average.toFixed(2) %>
+              </td>
+              <td>
+                <%= versionData.total %>
+              </td>
+            </tr>
+            <% }); %>
+    </table>
+  </div>
+</div>

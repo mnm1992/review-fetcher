@@ -28,12 +28,13 @@ Create the table as specified in dbStructure. You can do this automatically by r
 ### Setting up the configuration
 Open configs.js, and follow the instructions in the file.
 
+### installing the libraries
+run npm install in the commandline
+
 ### Running it
-You need to run node startFetching.js once to fill the database. After the initial fetch I would advice to schedule it to run every 10 minutes to keep your database up to date. After the database is filled you can run node index.js to start the website.
+You need to run node startFetching.js once to fill the database. After the initial fetch I would advice to schedule it to run every 10 minutes to keep your database up to date. After the database is filled you can run node website/index.js to start the website.
 Then in your web browser open:</br>
-localhost:8000/&lt;app name from config&gt;/android</br>
-localhost:8000/&lt;app name from config&gt;/ios</br>
-localhost:8000/&lt;app name from config&gt;/graph
+localhost:8000/&lt;app name from config&gt;</br>
 
 How to set it up in heroku?  
 =========
@@ -51,10 +52,8 @@ Now manually run the line defined in dbStructure.
 Open configs.js, and follow the instructions in the file.
 
 ### Running it
-Configure heroku scheduler to run startFetching.js to run every 10 minutes.
+Configure heroku scheduler to run node fetcher/startFetching.js to run every 10 minutes.
 After that just do a git push to deploy review-fetcher.
 
 Then in your web browser open:</br>
-&lt;Heroku url&gt;/&lt;app name from config&gt;/android</br>
-&lt;Heroku url&gt;/&lt;app name from config&gt;/ios</br>
-&lt;Heroku url&gt;/&lt;app name from config&gt;/graph
+&lt;Heroku url&gt;/&lt;app name from config&gt;</br>

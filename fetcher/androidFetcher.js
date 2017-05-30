@@ -1,6 +1,6 @@
 const gplay = require('google-play-scraper');
 const google = require('googleapis');
-const Review = require('./review');
+const Review = require('../common/review');
 const LocaleHelper = require('./localeHelper');
 const localeHelper = new LocaleHelper();
 
@@ -102,7 +102,7 @@ module.exports = class AndroidFetcher {
 		reviewInfo.text = reviewText[1];
 		reviewInfo.author = json.authorName;
 		reviewInfo.rating = json.comments[0].userComment.starRating;
-		reviewInfo.dateTime = new Date(json.comments[0].userComment.lastModified.seconds * 1000);;
+		reviewInfo.dateTime = new Date(json.comments[0].userComment.lastModified.seconds * 1000);
 		reviewInfo.hasTime = true;
 		reviewInfo.source = 'API';
 		if (json.comments.length > 1) {
@@ -114,11 +114,14 @@ module.exports = class AndroidFetcher {
 		deviceInfo.device = json.comments[0].userComment.device;
 		deviceInfo.osVersion = json.comments[0].userComment.androidOsVersion;
 		deviceInfo.isoCode = json.comments[0].userComment.reviewerLanguage;
-		deviceInfo.deviceMetadata = JSON.stringify(json.comments[0].userComment.deviceMetadata);
+		deviceInfo.deviceMetadata = json.comments[0].userComment.deviceMetadata;
 
 		localeHelper.getCountryAndLanguage(deviceInfo.isoCode, function (country, language) {
 			deviceInfo.country = country;
 			deviceInfo.language = language;
+			const splitIsoArray = deviceInfo.isoCode.split('_');
+			deviceInfo.languageCode = splitIsoArray[0].toLowerCase();
+			deviceInfo.countryCode = splitIsoArray[1].toLowerCase();
 			completion(new Review(deviceInfo, appInfo, reviewInfo));
 		});
 	}

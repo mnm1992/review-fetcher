@@ -1,6 +1,6 @@
 const dateLib = require('date-and-time');
 const gplay = require('google-play-scraper');
-const Review = require('./review');
+const Review = require('../common/review');
 const async = require('async');
 const LocaleHelper = require('./localeHelper');
 const localeHelper = new LocaleHelper();
@@ -38,6 +38,12 @@ function convertDateStringToDate(dateString) {
 
 	dateLib.locale('sr');
 	date = dateLib.parse(dateString, 'D MMMM YYYY', true);
+	if (Object.prototype.toString.call(date) === '[object Date]') {
+		return date;
+	}
+
+	dateLib.locale('zh-cn');
+	date = dateLib.parse(dateString, 'YYYY年M月D日', true);
 	if (Object.prototype.toString.call(date) === '[object Date]') {
 		return date;
 	}
@@ -127,7 +133,7 @@ module.exports = class AndroidScraper {
 		}).then(function (app) {
 			const numberOfReviews = parseInt(app.reviews);
 			const averageRating = parseFloat(app.score);
-			callback(numberOfReviews, averageRating);
+			callback(numberOfReviews, averageRating, app.histogram);
 		}).catch(function (error) {
 			console.log(error);
 			callback(0, 0);

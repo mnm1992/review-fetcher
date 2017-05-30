@@ -1,0 +1,38 @@
+<%
+function getColor(value){
+    //value from 0 to 1
+    var hue=((value)*80).toString(10);
+    return ["hsl(",hue,",100%,75%)"].join("");
+}
+%>
+<div class="card">
+  <div class="card-block">
+    <h4 class="card-title">Countries Android%></h4>
+    <table>
+      <tr>
+        <th></th>
+        <th>Country</th>
+        <th>Average</th>
+        <th>#Reviews</th>
+      </tr>
+      <% androidCountryStats.sort(function(x, y){ if (x.country < y.country) { return -1; } if (x.country > y.country) { return 1; } return 0; }); %>
+        <% androidCountryStats.forEach(function(countryData) { %>
+          <tr>
+            <td>
+              <%= countryData.flag %>
+            </td>
+            <td>
+              <%= countryData.country %>
+            </td>
+            <% var ratingPercentage = (countryData.average / 5) * 100; %>
+              <td class="trend" style="background: linear-gradient(to right, <%= getColor(countryData.average / 5) %> 0%, <%= getColor(countryData.average / 5) %> <%= (countryData.average / 5) * 100 %>%, transparent <%= (countryData.average / 5) * 100 %>%,  transparent <%= 100 - (countryData.average / 5) * 100 %>%);">
+                <%= countryData.average.toFixed(2) %>
+              </td>
+              <td>
+                <%= countryData.total %>
+              </td>
+          </tr>
+          <% }); %>
+    </table>
+  </div>
+</div>
