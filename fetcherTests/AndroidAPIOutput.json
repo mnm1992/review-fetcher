@@ -1,0 +1,77 @@
+{
+  "reviews": [{
+    "reviewId": "gp:AOqpTOEFUWYS-7S2Ib7LOvXT4MpnNl_T7zMQE-_ly3PZmIxRwGbqjgWKX_TvfIWs_hFxbMKU6VYGxJT12Ip8E_k",
+    "authorName": "Rocky Vyas",
+    "comments": [{
+      "userComment": {
+        "text": "\tNoticed that when the app is running simultaneously on two phones and one bottle feed entry is put in, the app registers two feeds as opposed to one.",
+        "lastModified": {
+          "seconds": "1496262654",
+          "nanos": 781000000
+        },
+        "starRating": 2,
+        "reviewerLanguage": "en_GB",
+        "device": "noblelte",
+        "androidOsVersion": 24,
+        "appVersionCode": 67,
+        "appVersionName": "1.2.2",
+        "thumbsUpCount": 0,
+        "thumbsDownCount": 0,
+        "deviceMetadata": {
+          "productName": "noblelte (Galaxy Note5)",
+          "manufacturer": "Samsung",
+          "deviceClass": "phone",
+          "screenWidthPx": 1440,
+          "screenHeightPx": 2560,
+          "nativePlatform": "armeabi-v7a,armeabi,arm64-v8a",
+          "screenDensityDpi": 560,
+          "glEsVersion": 196609,
+          "cpuModel": "Exynos 7420",
+          "cpuMake": "Samsung",
+          "ramMb": 4096
+        }
+      }
+    }]
+  }, {
+    "reviewId": "gp:AOqpTOEt5gKUwoUOs1eELcwgm60IdM7eBknwEz25_KiIpVgrc6T1TrLYVED12rlETl8ndrqX3Bf7yXitfW_BwTQ",
+    "authorName": "Samantha Iasi",
+    "comments": [{
+      "userComment": {
+        "text": "\tBrilliant but just wish there was an option to add a second child as I have twins!",
+        "lastModified": {
+          "seconds": "1495936960",
+          "nanos": 359000000
+        },
+        "starRating": 4,
+        "reviewerLanguage": "en_GB",
+        "device": "zerolte",
+        "androidOsVersion": 24,
+        "appVersionCode": 67,
+        "appVersionName": "1.2.2",
+        "thumbsUpCount": 0,
+        "thumbsDownCount": 0,
+        "deviceMetadata": {
+          "productName": "zerolte (Galaxy S6 Edge)",
+          "manufacturer": "Samsung",
+          "deviceClass": "phone",
+          "screenWidthPx": 1440,
+          "screenHeightPx": 2560,
+          "nativePlatform": "armeabi-v7a,armeabi,arm64-v8a",
+          "screenDensityDpi": 640,
+          "glEsVersion": 196609,
+          "cpuModel": "Exynos 7420",
+          "cpuMake": "Samsung",
+          "ramMb": 3072
+        }
+      }
+    }, {
+      "developerComment": {
+        "text": "Hi there, Samantha. Thanks for your feedback and we can understand that it's a bummer you cannot use the app if you have twins. Please know that we always want to improve our products and app, so this would be a good improvement. :)",
+        "lastModified": {
+          "seconds": "1496322652",
+          "nanos": 534000000
+        }
+      }
+    }]
+  }]
+}

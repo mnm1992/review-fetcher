@@ -28,25 +28,28 @@ function checkForNewReviews(config, completion) {
 			});
 		},
 		function (callback) {
-			console.time('Fetched Android reviews trough API');
 			if (config.androidAuthentication) {
+				console.time('Fetched Android reviews trough API');
 				fetchAndroidReviews(config, function (reviews) {
 					console.timeEnd('Fetched Android reviews trough API');
 					androidReviewCompletion(reviews);
 					callback();
 				});
 			} else {
-				console.timeEnd('Fetched Android reviews trough API');
 				callback();
 			}
 		},
 		function (callback) {
-			console.time('Fetched Android reviews trough Scraping');
-			scrapeAndroidReviews(config, function (reviews) {
-				console.timeEnd('Fetched Android reviews trough Scraping');
-				androidReviewCompletion(reviews);
+			if (!config.androidAuthentication) {
+				console.time('Fetched Android reviews trough Scraping');
+				scrapeAndroidReviews(config, function (reviews) {
+					console.timeEnd('Fetched Android reviews trough Scraping');
+					androidReviewCompletion(reviews);
+					callback();
+				});
+			} else {
 				callback();
-			});
+			}
 		},
 		function (callback) {
 			console.time('Fetched Android ratings trough Scraping');
@@ -135,51 +138,49 @@ function addRatingsToDB(config, ratingJSON, callback) {
 }
 
 function shareOnSlack(config, reviews, callback) {
-    if (process.env.PORT === undefined) {
-        console.log('Not posting to Slack since this is localhost');
-        callback();
-        return;
-    }
+	if (process.env.PORT === undefined) {
+		console.log('Not posting to Slack since this is localhost');
+		callback();
+		return;
+	}
 
-    if (!config.slackHook || !config.slackChannel || !config.slackBot) {
-        console.log('No slack hook configured for ' + config.appName);
-        callback();
-        return;
-    }
+	if (!config.slackHook || !config.slackChannel || !config.slackBot) {
+		console.log('No slack hook configured for ' + config.appName);
+		callback();
+		return;
+	}
 
-    const webhookUri = config.slackHook;
-    if (reviews.length === 0) {
-        console.log('There are no new reviews to post to slack');
-        callback();
-        return;
-    }
+	const webhookUri = config.slackHook;
+	if (reviews.length === 0) {
+		console.log('There are no new reviews to post to slack');
+		callback();
+		return;
+	}
 
-    slack.setWebhook(webhookUri);
+	slack.setWebhook(webhookUri);
 
-    console.log('Sharing ' + reviews.length + ' on slack');
-    reviews.forEach(function (entry) {
-        var text = '';
-        text += entry.createReviewSlackText();
-        if (!text) {
-            console.log('Nothing to post to Slack: ');
-            return;
-        }
-        console.time('Posting to slack');
-        slack.webhook({
-            channel: config.slackChannel,
-            username: config.slackBot,
-            text: text
-        }, function (err, response) {
-            if (err) {
-                console.error('Error posting reviews to Slack: ' + err);
-            } else {
-                console.log('Succesfully posted reviews to slack');
-            }
-            console.timeEnd('Posting to slack');
-        });
+	console.log('Sharing ' + reviews.length + ' on slack');
+	reviews.forEach(function (entry) {
+		var text = '';
+		text += entry.createReviewSlackText();
+		if (!text) {
+			console.log('Nothing to post to Slack: ');
+			return;
+		}
+		slack.webhook({
+			channel: config.slackChannel,
+			username: config.slackBot,
+			text: text
+		}, function (err, response) {
+			if (err) {
+				console.error('Error posting reviews to Slack: ' + err);
+			} else {
+				console.log('Succesfully posted reviews to slack');
+			}
+		});
 
-    });
-    callback();
+	});
+	callback();
 }
 
 function start(completion) {
