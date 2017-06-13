@@ -12,8 +12,8 @@ const connectionString = process.env.DATABASE_URL ? process.env.DATABASE_URL : {
 };
 const db = pgp(connectionString);
 const Column = pgp.helpers.Column;
-const reviewidColumn = new Column('reviewid');
-const appidColumn = new Column('appid');
+const reviewidColumn = new Column('?reviewid');
+const appidColumn = new Column('?appid');
 const deviceinfoColumn = new Column({
 	name: 'deviceinfo',
 	cast: 'json',
