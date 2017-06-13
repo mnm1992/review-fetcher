@@ -4,14 +4,16 @@ Review fetcher
 What does it do?  
 =========
 It fetches Android and iOS reviews for all configured apps. It then show these at it's website or/and posts them to slack.</br>
-Example of review-fetcher running with the google api: https://review-fetcher.herokuapp.com/ugrow/android</br>
+Example of review-fetcher running with the Google api: https://review-fetcher.herokuapp.com/ugrow/android</br>
 Example of review-fetcher running with the html scraping: https://review-fetcher.herokuapp.com/compass/android
 
 How does it do this?  
 =========
-It fetches all ios reviews from the itunes rss feed:
+It fetches all iOS reviews from the itunes rss feed:
 https://itunes.apple.com/gb/rss/customerreviews/page=1/id=1063224663/sortby=mostrecent/xml</br>
-For android it either uses html scraping or the official google api.</br>
+For iOS ratings we use scraping via the itunes webobject interface (this requires the itunes appagent and a store id in the headers):
+http://ax.phobos.apple.com.edgesuite.net/WebObjects/MZStore.woa/wa/viewContentsUserReviews?id=1063224663&pageNumber=0&sortOrdering=2&type=Purple+Software</br>
+For Android it either uses html scraping or the official Google api.</br>
 Scraping: https://github.com/facundoolano/google-play-scraper</br>
 Google API: https://developers.google.com/android-publisher/api-ref/reviews
 
