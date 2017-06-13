@@ -19,6 +19,16 @@ app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/public'));
 
 var footer = '';
+const heroku = require("heroku");
+const client = new heroku.Heroku({
+  key: "2af60f5e-2050-4667-bb1d-a8129b082e41"
+});
+client.get_releases("review-fetcher", function(error, result) {
+  const info = result[result.length - 1];
+  const date = dateLib.format(new Date(info.created_at), 'DD MMM YYYY HH:mm:ss', true);
+  footer = 'Review fetcher ' + info.name + '(' + info.commit + ') ' + date;
+  console.log(footer);
+});
 
 function getDefaultParams(config, callback) {
   reviewDB.getRating(config, function(ratingJSON) {
@@ -68,19 +78,22 @@ app.get('/:app/:platform', function(request, response) {
     notFound(response, 'platform not found');
     return;
   }
+  if (request.params.platform.toLowerCase() === 'logo.png') {
+    sendImage("/ugrow/images/logo.png", response);
+  } else {
+    getDefaultParams(config, function(ratingJSON, defaultParams) {
+      if (request.params.platform.toLowerCase() === 'ios') {
+        iOSPage.constructIOSPage(config, defaultParams, ratingJSON, response);
+      } else if (request.params.platform.toLowerCase() === 'android') {
+        androidPage.constructAndroidPage(config, defaultParams, ratingJSON, response);
+      } else if (request.params.platform.toLowerCase() === 'graph') {
+        graphPage.constructGraphPage(config, defaultParams, response);
+      } else {
+        statisticsPage.constructStatsPage(config, defaultParams, response);
+      }
+    });
 
-  getDefaultParams(config, function(ratingJSON, defaultParams) {
-    if (request.params.platform.toLowerCase() === 'ios') {
-      iOSPage.constructIOSPage(config, defaultParams, ratingJSON, response);
-    } else if (request.params.platform.toLowerCase() === 'android') {
-      androidPage.constructAndroidPage(config, defaultParams, ratingJSON, response);
-    } else if (request.params.platform.toLowerCase() === 'graph') {
-      graphPage.constructGraphPage(config, defaultParams, response);
-    } else {
-      statisticsPage.constructStatsPage(config, defaultParams, response);
-    }
-  });
-
+  }
 });
 
 app.get('/:app/:platform/version/:version', function(request, response) {
@@ -144,6 +157,11 @@ app.get('/:app', function(request, response) {
   getDefaultParams(config, function(ratingJSON, defaultParams) {
     appPage.constructAppPage(config, defaultParams, ratingJSON, response);
   });
+});
+
+
+app.get('/ugrow/images/favicon.png', function(req, res) {
+  sendImage(req.url, res);
 });
 
 app.listen(process.env.PORT || 8000, null);

@@ -16,11 +16,11 @@ module.exports = {
           tabTitle: config.appName + ' iOS Reviews',
           pageTitle: config.appName + ' iOS',
           page: 'iOS',
-          totalRatings: totalReviews,
-          averageRatings: reviewAverage,
           totalReviews: totalReviews,
           averageReviews: reviewAverage,
-          ratingHistogram: histogram,
+          totalRatings: ratingJSON.iOSTotal,
+          averageRatings: ratingJSON.iOSAverage,
+          ratingHistogram: ratingJSON.iOSHistogram,
           reviewHistogram: histogram,
           reviews: reviews
         };

@@ -2,6 +2,7 @@ const async = require('async');
 const configs = require('../common/configs');
 const reviewHelper = require('../common/reviewHelper');
 const IOSFetcher = require('./iosFetcher');
+const IOSRatingScraper = require('./iosRatingScraper');
 const AndroidScraper = require('./androidScraper');
 const AndroidFetcher = require('./androidFetcher');
 const ReviewJSONDB = require('../common/reviewJSONDB');
@@ -9,9 +10,38 @@ const reviewDB = new ReviewJSONDB();
 const slackLibrary = require('slack-node');
 const slack = new slackLibrary();
 
+function addAllHistograms(histograms) {
+	const histogram = {
+		1: 0,
+		2: 0,
+		3: 0,
+		4: 0,
+		5: 0
+	};
+	for (var key in histograms) {
+		histogram['1'] += histograms[key]['1'];
+		histogram['2'] += histograms[key]['2'];
+		histogram['3'] += histograms[key]['3'];
+		histogram['4'] += histograms[key]['4'];
+		histogram['5'] += histograms[key]['5'];
+	}
+	return histogram;
+}
+
+function averageFromReviews(histogram){
+	const amountOfReviews = histogram['1'] + histogram['2'] + histogram['3'] + histogram['4']+ histogram['5'];
+	const totalReviewScore = (1*histogram['1']) + (2*histogram['2']) + (3*histogram['3']) + (4*histogram['4']) + (5*histogram['5']);
+	return {
+		amount: amountOfReviews,
+		average: (totalReviewScore/amountOfReviews)
+	};
+}
+
 function checkForNewReviews(config, completion) {
 	var allReviews = [];
 	const ratingJSON = {};
+	var histograms = {};
+
 	const androidReviewCompletion = function (androidReviews) {
 		if (androidReviews.length > 0) {
 			allReviews = allReviews.concat(androidReviews);
@@ -19,11 +49,27 @@ function checkForNewReviews(config, completion) {
 	};
 	async.series([function (callback) {
 			console.time('Fetched iOS reviews');
-			fetchIOSReviews(config, function (iOSReviews) {
+			fetchIOSReviews(config, function (iOSReviews, calculatedHistograms) {
+				histograms = calculatedHistograms;
 				if (iOSReviews.length > 0) {
 					allReviews = allReviews.concat(iOSReviews);
 				}
 				console.timeEnd('Fetched iOS reviews');
+				callback();
+			});
+		}, function (callback) {
+			console.time('Fetched iOS ratings');
+			fetchIOSRatings(config, function (scrapedhistograms) {
+				for (var key in scrapedhistograms) {
+					histograms[key] = scrapedhistograms[key];
+				}
+				const combinedHistogram = addAllHistograms(histograms);
+				const averageDetails = averageFromReviews(combinedHistogram);
+				ratingJSON.histogramPerCountry = histograms;
+				ratingJSON.iOSHistogram = combinedHistogram;
+				ratingJSON.iOSTotal = averageDetails.amount;
+				ratingJSON.iOSAverage = averageDetails.average;
+				console.timeEnd('Fetched iOS ratings');
 				callback();
 			});
 		},
@@ -94,12 +140,20 @@ function iosAverage(reviews, completion) {
 	completion(reviewCount, averageRating);
 }
 
+function fetchIOSRatings(config, callback) {
+	const scraper = new IOSRatingScraper(config);
+	console.log('Fetching iOS reviews');
+	scraper.fetchRatings(function (histogram) {
+		callback(histogram);
+	});
+}
+
 function fetchIOSReviews(config, callback) {
 	const fetcher = new IOSFetcher(config);
 	console.log('Fetching iOS reviews');
-	fetcher.fetchReviews(function (reviews) {
+	fetcher.fetchReviews(function (reviews, histogram) {
 		console.log('Fetched: ' + reviews.length + ' iOS reviews');
-		callback(reviews);
+		callback(reviews, histogram);
 	});
 }
 
