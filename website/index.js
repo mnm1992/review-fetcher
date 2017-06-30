@@ -1,167 +1,37 @@
-const dateLib = require('date-and-time');
-const express = require('express');
-const ReviewJSONDB = require('../common/reviewJSONDB');
-const reviewDB = new ReviewJSONDB();
-const configs = require('../common/configs');
-const fs = require('fs');
-const statisticsPage = require('./statisticsPage');
-const countryPage = require('./countryPage');
-const versionPage = require('./versionPage');
-const graphPage = require('./graphPage');
-const iOSPage = require('./iOSPage');
 const androidPage = require('./androidPage');
-const appPage = require('./appPage');
+const iOSPage = require('./iOSPage');
+const graphPage = require('./graphPage');
+const statisticsPage = require('./statisticsPage');
+const versionPage = require('./versionPage');
+const countryPage = require('./countryPage');
 const exportPage = require('./exportPage');
+const appPage = require('./appPage');
+const responseHelper = require('./responseHelper');
+const express = require('express');
 const compression = require('compression');
 const app = express();
+
 app.use(compression());
 app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/public'));
-
-var footer = '';
-const heroku = require("heroku");
-const client = new heroku.Heroku({
-  key: "2af60f5e-2050-4667-bb1d-a8129b082e41"
-});
-client.get_releases("review-fetcher", function(error, result) {
-  const info = result[result.length - 1];
-  const date = dateLib.format(new Date(info.created_at), 'DD MMM YYYY HH:mm:ss', true);
-  footer = 'Review fetcher ' + info.name + '(' + info.commit + ') ' + date;
-  console.log(footer);
-});
-
-function getDefaultParams(config, callback) {
-  reviewDB.getRating(config, function(ratingJSON) {
-    callback(ratingJSON, {
-      appName: config.appName,
-      footer: footer,
-      iosVersions: ratingJSON.iosVersions,
-      androidVersions: ratingJSON.androidVersions,
-      countries: ratingJSON.countries
-    });
-  });
-}
-
-function notFound(response, errorMessage) {
-  response.writeHead(404, {
-    'Content-Type': 'text/html'
-  });
-
-  console.log(errorMessage);
-  response.end(errorMessage);
-}
-
-function sendImage(name, response) {
-  const filePath = '.' + name;
-  fs.readFile(filePath, function(error, content) {
-    if (error) {
-      const errorMessage = 'Error: ' + error + '\nFile path: ' + filePath;
-      notFound(response, errorMessage);
-      return;
-    }
-
-    response.writeHead(200, {
-      'Content-Type': 'image/png'
-    });
-    response.end(content);
-  });
-}
-
-app.get('/:app/:platform', function(request, response) {
-  const config = configs.configForApp(request.params.app.toLowerCase());
-  if (config === null) {
-    notFound(response, 'proposition not found');
-    return;
-  }
-  const allowedPlatforms = ['logo.png', 'ios', 'android', 'graph', 'statistics'];
-  if (!allowedPlatforms.includes(request.params.platform.toLowerCase())) {
-    notFound(response, 'platform not found');
-    return;
-  }
-  if (request.params.platform.toLowerCase() === 'logo.png') {
-    sendImage("/ugrow/images/logo.png", response);
-  } else {
-    getDefaultParams(config, function(ratingJSON, defaultParams) {
-      if (request.params.platform.toLowerCase() === 'ios') {
-        iOSPage.constructIOSPage(config, defaultParams, ratingJSON, response);
-      } else if (request.params.platform.toLowerCase() === 'android') {
-        androidPage.constructAndroidPage(config, defaultParams, ratingJSON, response);
-      } else if (request.params.platform.toLowerCase() === 'graph') {
-        graphPage.constructGraphPage(config, defaultParams, response);
-      } else {
-        statisticsPage.constructStatsPage(config, defaultParams, response);
-      }
-    });
-
-  }
-});
-
-app.get('/:app/:platform/version/:version', function(request, response) {
-  const config = configs.configForApp(request.params.app.toLowerCase());
-  if (config === null) {
-    notFound(response, 'proposition not found');
-    return;
-  }
-  const allowedPlatforms = ['ios', 'android'];
-  if (!allowedPlatforms.includes(request.params.platform.toLowerCase())) {
-    notFound(response, 'platform not found');
-    return;
-  }
-  const platform = request.params.platform.toLowerCase();
-  const version = request.params.version.toLowerCase();
-  getDefaultParams(config, function(ratingJSON, defaultParams) {
-    versionPage.constructVersionPage(config, platform, version, defaultParams, response);
-  });
-});
-
-app.get('/:app/export/:option', function(request, response) {
-  const config = configs.configForApp(request.params.app.toLowerCase());
-  if (config === null) {
-    notFound(response, 'proposition not found');
-    return;
-  }
-  const allowedOptions = ['json', 'xml', 'csv'];
-  const option = request.params.option.toLowerCase();
-  if (!allowedOptions.includes(option)) {
-    notFound(response, 'platform not found');
-    return;
-  }
-
-  if (option === 'json') {
-    exportPage.constructJSONDump(config, response);
-  } else if (option === 'xml') {
-    exportPage.constructXMLDump(config, response);
-  } else if (option === 'csv') {
-    exportPage.constructCSVDump(config, response);
-  }
-});
-
-app.get('/:app/country/:countryCode', function(request, response) {
-  const config = configs.configForApp(request.params.app.toLowerCase());
-  if (config === null) {
-    notFound(response, 'proposition not found');
-    return;
-  }
-  const option = request.params.countryCode.toLowerCase();
-  getDefaultParams(config, function(ratingJSON, defaultParams) {
-    countryPage.constructCountryPage(config, option, defaultParams, ratingJSON, response);
-  });
-});
-
-app.get('/:app', function(request, response) {
-  const config = configs.configForApp(request.params.app.toLowerCase());
-  if (config === null) {
-    notFound(response, 'proposition not found');
-    return;
-  }
-  getDefaultParams(config, function(ratingJSON, defaultParams) {
-    appPage.constructAppPage(config, defaultParams, ratingJSON, response);
-  });
-});
-
-
-app.get('/ugrow/images/favicon.png', function(req, res) {
-  sendImage(req.url, res);
-});
-
+app.get('/:app/images/favicon.png', getFavicon);
+app.get('/:app/logo.png', getLogo);
+app.get('/:app/android', androidPage.render);
+app.get('/:app/ios', iOSPage.render);
+app.get('/:app/graph', graphPage.render);
+app.get('/:app/statistics', statisticsPage.render);
+app.get('/:app/:platform/version/:version', versionPage.render);
+app.get('/:app/country/:countryCode', countryPage.render);
+app.get('/:app/export/csv', exportPage.exportCSV);
+app.get('/:app/export/json', exportPage.exportJSON);
+app.get('/:app/export/xml', exportPage.exportXML);
+app.get('/:app', appPage.render);
 app.listen(process.env.PORT || 8000, null);
+
+function getLogo(request, response) {
+	responseHelper.sendImage("/images/ugrow/logo.png", response);
+}
+
+function getFavicon(request, response) {
+	responseHelper.sendImage('/images/' + request.params.app.toLowerCase() + '/favicon.png', response);
+}

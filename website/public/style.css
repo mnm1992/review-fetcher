@@ -111,6 +111,16 @@ div.rating-bar-fill {
   height:0.8rem;
 }
 
+@media all and (max-width: 710px) {
+  /* define mobile specific styles come here */
+  div.rating-bar {
+    visibility:hidden;
+    display:inline;
+    width:0 !important;
+    margin:0 !important;
+  }
+}
+
 span.star-icons {
   margin-right: 0.2rem;
   letter-spacing: 0.2rem;

@@ -1,3 +1,5 @@
+const responseHelper = require('./responseHelper');
+const configs = require('../common/configs');
 const ReviewJSONDB = require('../common/reviewJSONDB');
 const reviewDB = new ReviewJSONDB();
 const json2csv = require('json2csv');
@@ -10,63 +12,66 @@ const builder = new xml2js.Builder({
 
 module.exports = {
 
-	constructJSONDump: function (config, response) {
-		console.time('Exporting JSON');
-		exportJSON(config, function (data, fileName) {
-			sendFile(data, fileName, 'application/json', response);
-			console.timeEnd('Exporting JSON');
-		});
+	exportJSON: function (request, response) {
+		const config = configs.configForApp(request.params.app.toLowerCase());
+		if (config === null) {
+			responseHelper.notFound(response, 'proposition not found');
+			return;
+		}
+		constructJSONDump(config, response);
 	},
 
-	constructXMLDump: function (config, response) {
-		console.time('Exporting XML');
-		exportXML(config, function (data, fileName) {
-			sendFile(data, fileName, 'text/xml', response);
-			console.timeEnd('Exporting XML');
-		});
+	exportXML: function (request, response) {
+		const config = configs.configForApp(request.params.app.toLowerCase());
+		if (config === null) {
+			responseHelper.notFound(response, 'proposition not found');
+			return;
+		}
+		constructXMLDump(config, response);
 	},
 
-	constructCSVDump: function (config, response) {
-		console.time('Exporting csv');
-		exportCSV(config, function (data, fileName) {
-			sendFile(data, fileName, 'text/csv', response);
-			console.timeEnd('Exporting csv');
-		});
-	}
+	exportCSV: function (request, response) {
+		const config = configs.configForApp(request.params.app.toLowerCase());
+		if (config === null) {
+			responseHelper.notFound(response, 'proposition not found');
+			return;
+		}
+		constructCSVDump(config, response);
+	},
 };
 
-function sendFile(data, fileName, content, response) {
-	response.writeHead(200, {
-		'Content-Type': content + '; charset=utf-8',
-		'Content-Disposition': 'attachment;filename=' + fileName
-	});
-	response.end(data);
-}
-
-function exportJSON(config, completion) {
+function constructJSONDump(config, response) {
+	console.time('Exporting JSON');
 	const reviewArray = [];
 	reviewDB.getAllReviews(config, function (reviews) {
 		reviews.forEach(function (review) {
 			reviewArray.push(review.getJSON());
 		});
-		completion(JSON.stringify(reviewArray), config.appName + '_reviews.json');
+		const data = JSON.stringify(reviewArray);
+		const fileName = config.appName + '_reviews.json';
+		responseHelper.sendFile(data, fileName, 'application/json', response);
+		console.timeEnd('Exporting JSON');
 	});
 }
 
-function exportXML(config, completion) {
+function constructXMLDump(config, response) {
+	console.time('Exporting XML');
 	const reviewArray = [];
 	reviewDB.getAllReviews(config, function (reviews) {
 		reviews.forEach(function (review) {
 			reviewArray.push(review.getJSON());
 		});
-		//hack needed since the library can't handle dates
-		completion(builder.buildObject(JSON.parse(JSON.stringify({
+		const data = builder.buildObject(JSON.parse(JSON.stringify({
 			"review": reviewArray
-		}))), config.appName + '_reviews.xml');
+		})));
+		const fileName = config.appName + '_reviews.xml';
+		responseHelper.sendFile(data, fileName, 'text/xml', response);
+		console.timeEnd('Exporting XML');
 	});
 }
 
-function exportCSV(config, completion) {
+function constructCSVDump(config, response) {
+	console.time('Exporting csv');
 	const reviewArray = [];
 	var fields = [];
 	var fieldNames = [];
@@ -81,10 +86,13 @@ function exportCSV(config, completion) {
 		reviews.forEach(function (review) {
 			reviewArray.push(review.getJSON());
 		});
-		completion(json2csv({
+		const data = json2csv({
 			data: reviewArray,
 			fields: fields,
 			fieldNames: fieldNames
-		}), config.appName + '_reviews.csv');
+		});
+		const fileName = config.appName + '_reviews.csv';
+		responseHelper.sendFile(data, fileName, 'text/csv', response);
+		console.timeEnd('Exporting csv');
 	});
 }

@@ -52,10 +52,33 @@ function findNumber(ignore, string) {
 	return ignore;
 }
 
+function walkJsonTree(path, json) {
+	const pathComponents = path.split('/');
+	var currentView = json;
+	for (var i = 0; i < pathComponents.length; i++) {
+		if (currentView[pathComponents[i]]) {
+			currentView = currentView[pathComponents[i]];
+		} else {
+			return null;
+		}
+	}
+	return currentView;
+}
+
 function fetchRatingsForCountry(country, appId, callback) {
-	request(constructOptions(country, appId), function (error, response, body) {
+	request(constructOptions(country, appId), function (requestError, response, body) {
+		if(requestError){
+			console.error(requestError);
+			callback(null, {});
+			return;
+		}
 		xml2js.parseString(body,
-			function (err, json) {
+			function (xmlParsingError, json) {
+				if(xmlParsingError){
+					console.error(xmlParsingError);
+					callback(null, {});
+					return;
+				}
 				const histogram = {
 					1: 0,
 					2: 0,
@@ -63,18 +86,19 @@ function fetchRatingsForCountry(country, appId, callback) {
 					4: 0,
 					5: 0
 				};
-				try {
-					const histogramWebObject = (json.Document.View[0].ScrollView[0].VBoxView[0].View[0].MatrixView[0].VBoxView[0].HBoxView[0].VBoxView[1].VBoxView[0].View[0].View[0].View[0].VBoxView[0].Test[0].VBoxView[1].MatrixView[0].VBoxView[0]);
-					for (var i = 0; i < histogramWebObject.HBoxView.length; i++) {
-						const stars = 5 - i;
-						const foundText = histogramWebObject.HBoxView[i].$.alt;
-						histogram[stars + ''] = findNumber(stars, foundText);
-					}
-				} catch (err) {
+
+				const histogramWebObjectContainer = walkJsonTree('Document/View/0/ScrollView/0/VBoxView/0/View/0/MatrixView/0/VBoxView/0/HBoxView/0/VBoxView/1/VBoxView/0/View/0/View/0/View/0/VBoxView/0/Test/0/VBoxView/1/MatrixView/0/VBoxView/0/HBoxView', json);
+				if (!histogramWebObjectContainer) {
 					callback(null, {});
 					return;
-					//console.error(country + ' does not seem to have enough reviews for a histogram');
 				}
+
+				for (var i = 0; i < histogramWebObjectContainer.length; i++) {
+					const stars = 5 - i;
+					const foundText = histogramWebObjectContainer[i].$.alt;
+					histogram[stars + ''] = findNumber(stars, foundText);
+				}
+
 				const returnValue = {};
 				returnValue[country] = histogram;
 				callback(null, returnValue);

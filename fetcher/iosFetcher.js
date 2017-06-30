@@ -1,26 +1,9 @@
 const async = require('async');
 const request = require('request');
 const rssParser = require('./iOSRSSParser');
+const histogramCalculator = require('../common/histogramCalculator');
 
 module.exports = class IOSFetcher {
-
-	calculateHistogram(reviews, platform) {
-		const overide = platform ? false : true;
-		const histogram = {
-			1: 0,
-			2: 0,
-			3: 0,
-			4: 0,
-			5: 0
-		};
-		reviews.forEach(function (review) {
-			const correctPlatform = overide || (review.deviceInfo.platform.toLowerCase() === platform.toLowerCase());
-			if (correctPlatform) {
-				histogram[review.reviewInfo.rating] = histogram[review.reviewInfo.rating] += 1;
-			}
-		});
-		return histogram;
-	}
 
 	constructor(config) {
 		this.config = config;
@@ -51,13 +34,12 @@ module.exports = class IOSFetcher {
 	}
 
 	fetchForCountry(country, completion) {
-		const self = this;
 		this.fetchRecursively([], country, 1, function (fetchedReviews) {
 			const returnValue = {
 				reviews: fetchedReviews,
 				histogram: {}
 			};
-			returnValue.histogram[country] = self.calculateHistogram(fetchedReviews, 'ios');
+			returnValue.histogram[country] = histogramCalculator.calculateHistogram(fetchedReviews, 'ios');
 			completion(null, returnValue);
 		});
 	}

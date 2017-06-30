@@ -24,10 +24,14 @@
     <% averageRatings =  (typeof averageRatings != 'undefined') ? averageRatings : 0; %>
     <% ratingHistogram =  (typeof ratingHistogram != 'undefined') ? ratingHistogram : {}; %>
     <h2><%- pageTitle %></h2>
+
     <div class="rating-average">
       <h1 class="rating-average-title"><%- averageRatings.toFixed(2); %></h1>
       <p class="rating-amount"><img src="/person.svg" class="total-icon" alt="person-icon" /><%- totalRatings %> in total</p>
       <p class="rating-amount"><img src="/message.svg" class="total-icon" alt="message-icon" /><%- totalReviews %> in total</p>
+      <% if((typeof hint != 'undefined')){ %>
+        <div><small><i>*<%- hint %></i></small></div>
+      <% } %>
     </div>
     <ul class="rating-list">
       <% for (var i = 5; i >= 1; i--) { %>
@@ -43,7 +47,6 @@
           </div>
           <img src="/message.svg" class="rating-review-icon" alt="Reviews with description" />
           <span class="review-ratings-text"><%= reviewHistogram['' + i] %></span>
-          </li>
         <li>
       <% } %>
     </ul>

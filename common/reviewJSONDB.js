@@ -172,18 +172,10 @@ module.exports = class ReviewJSONDB {
 		console.time('Fetched all reviews');
 		this.getAllReviews(config, function (reviewsFromDB) {
 			console.timeEnd('Fetched all reviews');
-			console.time('Determining all countries');
 			const countries = reviewHelper.appCountries(reviewsFromDB);
-			console.timeEnd('Determining all countries');
-			console.time('Determining android versions');
 			const androidVersions = reviewHelper.appVersions(reviewsFromDB, 'android');
-			console.timeEnd('Determining android versions');
-			console.time('Determining ios versions');
 			const iosVersions = reviewHelper.appVersions(reviewsFromDB, 'ios');
-			console.timeEnd('Determining ios versions');
-			console.time('Checking for duplicates');
 			const cleanReviews = reviewHelper.mergeReviewsFromArrays(reviewsFromDB, reviewsFetched);
-			console.timeEnd('Checking for duplicates');
 			console.log('Reviews in db: ' + (reviewsFromDB ? reviewsFromDB.length : 0));
 			console.log('Reviews fetched: ' + (reviewsFetched ? reviewsFetched.length : 0));
 			console.log('New reviews: ' + cleanReviews.newReviews.length);
