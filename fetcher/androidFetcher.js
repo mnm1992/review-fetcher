@@ -4,8 +4,18 @@ const androidAPIParser = require('./androidAPIParser');
 module.exports = class AndroidFetcher {
 	constructor(config) {
 		this.config = config;
-		if (this.config.androidAuthentication) {
-			this.androidAuthentication = require(this.config.androidAuthentication);
+	}
+
+	startFetching(callback) {
+		if (this.config.authentication) {
+			console.time('Fetched Android reviews trough API');
+			this.fetchReviews(function (androidReviews) {
+				console.timeEnd('Fetched Android reviews trough API');
+				console.log('Fetched: ' + androidReviews.length + ' Android reviews');
+				callback(null, androidReviews);
+			});
+		} else {
+			callback(null, []);
 		}
 	}
 
@@ -24,7 +34,7 @@ module.exports = class AndroidFetcher {
 				return;
 			}
 
-			androidAPIParser.parse(self.config.androidId, resp, function(reviewArray){
+			androidAPIParser.parse(self.config.id, resp, function(reviewArray){
 				if (resp.tokenPagination) {
 					completion(reviewArray, resp.tokenPagination.nextPageToken);
 				} else {
@@ -40,7 +50,7 @@ module.exports = class AndroidFetcher {
 		var response_list = [];
 		const options = {
 			auth: self.getAuth(),
-			packageName: self.config.androidId,
+			packageName: self.config.id,
 			maxResults: 100,
 		};
 		const reviews_received = function (review_array, next_token) {
@@ -57,9 +67,9 @@ module.exports = class AndroidFetcher {
 
 	getAuth() {
 		const jwtClient = new google.auth.JWT(
-			this.androidAuthentication.client_email,
+			this.config.authentication.client_email,
 			null,
-			this.androidAuthentication.private_key, ['https://www.googleapis.com/auth/androidpublisher'],
+			this.config.authentication.private_key, ['https://www.googleapis.com/auth/androidpublisher'],
 			null
 		);
 		return jwtClient;

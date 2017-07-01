@@ -6,6 +6,7 @@ module.exports = {
 		reviewDB.getRating(config, function (ratingJSON) {
 			callback(ratingJSON, {
 				appName: config.appName,
+				companyName: config.companyName,
 				footer: footer,
 				iosVersions: ratingJSON.iosVersions,
 				androidVersions: ratingJSON.androidVersions,

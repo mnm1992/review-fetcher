@@ -14,7 +14,7 @@ module.exports = {
     });
     completion(reviewArray);
   },
-
+  
   parseReview: function(appId, json, completion) {
     const deviceInfo = {};
     const appInfo = {};

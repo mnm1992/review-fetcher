@@ -72,7 +72,7 @@
             <% } %>
             <% if (review.reviewInfo.developerCommentDateTime) { %>
               <blockquote><em>
-              Philips responded on <%- review.getFormattedDeveloperReviewDate() %>
+              <%= companyName %> responded on <%- review.getFormattedDeveloperReviewDate() %>
               <br>
               <%- review.reviewInfo.developerComment %>
             </em></blockquote>

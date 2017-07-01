@@ -62,7 +62,7 @@ function upsertAverageRating(app, ratingJSON, callback) {
 		});
 }
 
-function getAllReviewsWithWhere(config, where, input, callback) {
+function getAllReviewsWithWhere(where, input, callback) {
 	const reviews = [];
 	db.any('SELECT deviceinfo, appinfo, reviewinfo, oldreviewinfo FROM reviewjson WHERE ' + where + ' ORDER BY reviewinfo->>\'dateTime\' desc', input)
 		.then(function (result) {
@@ -146,21 +146,21 @@ module.exports = class ReviewJSONDB {
 	}
 
 	getReviewsForCountry(config, country, callback) {
-		getAllReviewsWithWhere(config, '(appid = $1 OR appid = $2) AND deviceInfo->>\'countryCode\' = $3', [config.androidId, config.iosId, country], callback);
+		getAllReviewsWithWhere('(appid = $1 OR appid = $2) AND deviceInfo->>\'countryCode\' = $3', [config.androidConfig.id, config.iOSConfig.id, country], callback);
 	}
 
 	getReviewsForVersion(config, platform, version, callback) {
-		const appId = (platform.toLowerCase() === 'android') ? config.androidId : config.iosId;
-		getAllReviewsWithWhere(config, 'appid = $1 AND appInfo->>\'version\' = $2', [appId, version], callback);
+		const appId = (platform.toLowerCase() === 'android') ? config.androidConfig.id : config.iOSConfig.id;
+		getAllReviewsWithWhere('appid = $1 AND appInfo->>\'version\' = $2', [appId, version], callback);
 	}
 
 	getReviews(config, platform, callback) {
-		const appId = (platform.toLowerCase() === 'android') ? config.androidId : config.iosId;
-		getAllReviewsWithWhere(config, 'appid = $1', [appId], callback);
+		const appId = (platform.toLowerCase() === 'android') ? config.androidConfig.id : config.iOSConfig.id;
+		getAllReviewsWithWhere('appid = $1', [appId], callback);
 	}
 
 	getAllReviews(config, callback) {
-		getAllReviewsWithWhere(config, 'appid = $1 OR appid = $2', [config.androidId, config.iosId], callback);
+		getAllReviewsWithWhere('appid = $1 OR appid = $2', [config.androidConfig.id, config.iOSConfig.id], callback);
 	}
 
 	addNewReviews(config, reviewsFetched, callback) {

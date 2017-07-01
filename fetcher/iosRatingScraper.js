@@ -2,11 +2,22 @@ const storeMap = require('./iOSStores');
 const async = require('async');
 const request = require('request');
 const xml2js = require('xml2js');
+const histogramCalculator = require('../common/histogramCalculator');
 
 module.exports = class IOSRatingFetcher {
 
 	constructor(config) {
 		this.config = config;
+	}
+
+	startFetching(callback) {
+		console.time('Fetched iOS ratings');
+		this.fetchRatings(function (scrapedhistograms) {
+			const ratingMetadata = {};
+			ratingMetadata.histogramPerCountry = scrapedhistograms;
+			console.timeEnd('Fetched iOS ratings');
+			callback(null, ratingMetadata);
+		});
 	}
 
 	fetchRatings(completion) {
@@ -15,7 +26,7 @@ module.exports = class IOSRatingFetcher {
 
 		self.config.countries.forEach(function (country) {
 			fetchActions.push(function (callback) {
-				fetchRatingsForCountry(country, self.config.iosId, callback);
+				fetchRatingsForCountry(country, self.config.id, callback);
 			});
 		});
 		var histograms = {};

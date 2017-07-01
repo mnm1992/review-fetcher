@@ -47,18 +47,17 @@ module.exports = class AndroidScraper {
 		this.config = config;
 	}
 
-	fetchRatings(callback) {
-		gplay.app({
-			appId: this.config.androidId,
-			cache: false
-		}).then(function (app) {
-			const numberOfReviews = parseInt(app.reviews);
-			const averageRating = parseFloat(app.score);
-			callback(numberOfReviews, averageRating, app.histogram);
-		}).catch(function (error) {
-			console.log(error);
-			callback(0, 0);
-		});
+	startFetching(callback) {
+		if (!this.config.authentication) {
+			console.time('Fetched Android reviews trough Scraping');
+			this.fetchReviews(function (androidReviews) {
+				console.log('Fetched: ' + androidReviews.length + ' Android reviews');
+				console.timeEnd('Fetched Android reviews trough Scraping');
+				callback(null, androidReviews);
+			});
+		} else {
+			callback(null, []);
+		}
 	}
 
 	fetchReviews(completion) {
@@ -68,7 +67,7 @@ module.exports = class AndroidScraper {
 		this.config.languages.forEach(function (language) {
 			functions.push(function (callback) {
 				localeHelper.getLanguage(language, function (languageHeader) {
-					fetchReviewsForLanguage(self.config.androidId, language, languageHeader, callback);
+					fetchReviewsForLanguage(self.config.id, language, languageHeader, callback);
 				});
 			});
 		});
