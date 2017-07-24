@@ -33,7 +33,7 @@ function fetchReviewSet(appId, languageCode, language, page, completion) {
 			completion([], false);
 			return;
 		}
-		androidScrapedParser.parse(appId, apps, languageCode, language, function(reviewArray, abort, more){
+		androidScrapedParser.parse(appId, apps, languageCode, language, function (reviewArray, abort, more) {
 			completion(reviewArray, (!abort && more));
 		});
 	}).catch(function (e) {
@@ -48,7 +48,7 @@ module.exports = class AndroidScraper {
 	}
 
 	startFetching(callback) {
-		if (!this.config.authentication) {
+		if (this.config && Object.getOwnPropertyNames(this.config).length > 0 && !this.config.authentication) {
 			console.time('Fetched Android reviews trough Scraping');
 			this.fetchReviews(function (androidReviews) {
 				console.log('Fetched: ' + androidReviews.length + ' Android reviews');

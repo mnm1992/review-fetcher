@@ -14,7 +14,7 @@ module.exports = {
     });
     completion(reviewArray);
   },
-  
+
   parseReview: function(appId, json, completion) {
     const deviceInfo = {};
     const appInfo = {};
@@ -36,6 +36,7 @@ module.exports = {
     if (json.comments.length > 1) {
       reviewInfo.developerComment = json.comments[1].developerComment.text;
       reviewInfo.developerCommentDateTime = new Date(json.comments[1].developerComment.lastModified.seconds * 1000);
+      reviewInfo.developerCommentHasTime = true;
     }
 
     deviceInfo.platform = 'Android';

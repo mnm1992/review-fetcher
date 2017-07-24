@@ -7,7 +7,7 @@ module.exports = class AndroidFetcher {
 	}
 
 	startFetching(callback) {
-		if (this.config.authentication) {
+		if (this.config && Object.getOwnPropertyNames(this.config).length > 0 && this.config.authentication) {
 			console.time('Fetched Android reviews trough API');
 			this.fetchReviews(function (androidReviews) {
 				console.timeEnd('Fetched Android reviews trough API');
@@ -34,7 +34,7 @@ module.exports = class AndroidFetcher {
 				return;
 			}
 
-			androidAPIParser.parse(self.config.id, resp, function(reviewArray){
+			androidAPIParser.parse(self.config.id, resp, function (reviewArray) {
 				if (resp.tokenPagination) {
 					completion(reviewArray, resp.tokenPagination.nextPageToken);
 				} else {

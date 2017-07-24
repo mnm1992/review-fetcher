@@ -11,13 +11,17 @@ module.exports = class IOSRatingFetcher {
 	}
 
 	startFetching(callback) {
-		console.time('Fetched iOS ratings');
-		this.fetchRatings(function (scrapedhistograms) {
-			const ratingMetadata = {};
-			ratingMetadata.histogramPerCountry = scrapedhistograms;
-			console.timeEnd('Fetched iOS ratings');
-			callback(null, ratingMetadata);
-		});
+		if (this.config && Object.getOwnPropertyNames(this.config).length > 0) {
+			console.time('Fetched iOS ratings');
+			this.fetchRatings(function (scrapedhistograms) {
+				const ratingMetadata = {};
+				ratingMetadata.histogramPerCountry = scrapedhistograms;
+				console.timeEnd('Fetched iOS ratings');
+				callback(null, ratingMetadata);
+			});
+		} else {
+			callback(null, {});
+		}
 	}
 
 	fetchRatings(completion) {
@@ -78,14 +82,14 @@ function walkJsonTree(path, json) {
 
 function fetchRatingsForCountry(country, appId, callback) {
 	request(constructOptions(country, appId), function (requestError, response, body) {
-		if(requestError){
+		if (requestError) {
 			console.error(requestError);
 			callback(null, {});
 			return;
 		}
 		xml2js.parseString(body,
 			function (xmlParsingError, json) {
-				if(xmlParsingError){
+				if (xmlParsingError) {
 					console.error(xmlParsingError);
 					callback(null, {});
 					return;

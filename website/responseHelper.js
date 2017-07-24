@@ -1,5 +1,10 @@
 const fs = require('fs');
+const herokuDetails = require('./HerokuDetails');
 var footer = '';
+
+herokuDetails.fetchHerokuDetails(function (herokuDetails) {
+	footer = herokuDetails;
+});
 
 module.exports = {
 	getDefaultParams: function (config, reviewDB, callback) {
@@ -37,7 +42,11 @@ module.exports = {
 		fs.readFile(filePath, function (error, content) {
 			if (error) {
 				const errorMessage = 'Error: ' + error + '\nFile path: ' + filePath;
-				this.notFound(response, errorMessage);
+				response.writeHead(404, {
+					'Content-Type': 'text/html'
+				});
+				console.log(errorMessage);
+				response.end(errorMessage);
 				return;
 			}
 

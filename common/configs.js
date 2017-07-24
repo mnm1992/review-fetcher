@@ -44,6 +44,26 @@ function uGrowConfig() {
 */
 
 module.exports = {
+
+  /*
+  // Fill in how review fetcher should connect to your database.
+  // process.env.DATABASE_URL is the environment variable in which heroku stores the db connectionString
+  databaseConfig: function(){
+		return process.env.DATABASE_URL ? process.env.DATABASE_URL : {
+			host: 'localhost',
+			port: 5432,
+			database: 'postgres',
+			user: 'postgres',
+			password: 'postgres'
+		}; // either a connectionString or a dictionary containing host, port, database, user, password
+	},
+
+  // If you are using heroku hosting you can fill in your heroku to get deployment info in the footer
+  // Please provide an empty string if you're not using heroku
+	herokuToken: function(){
+		return '';
+	},*/
+
 	// replace the word ugrow below with the appname you defined in the config above
 	/*configForApp: function (app) {
 		if (app === 'ugrow') {

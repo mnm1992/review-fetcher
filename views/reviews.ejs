@@ -53,13 +53,13 @@
     <div style="clear:both;"></div>
 
     <% reviews.forEach(function(review){ %>
-        <h5><%- review.getRatingText(); %> on <%- review.getFormattedReviewDate(); %></h5>
+        <h5><%- review.deviceInfo.platform %> <%- review.getRatingText(); %> on <%- review.getFormattedReviewDate(); %></h5>
         <p>
             <% const title = review.reviewInfo.title?"<em>\"" + review.reviewInfo.title + "\"</em> - " : "" %>
             <%- title %><%- review.reviewInfo.author %><br>
             <%- review.reviewInfo.text %><br>
             <% if (review.appInfo.version && review.appInfo.versionCode) { %>
-              <small>v <%- review.appInfo.version %> , <%- review.appInfo.versionCode %>, <%- review.getLocationText(); %></small><br>
+              <small>v<%- review.appInfo.version %> , <%- review.appInfo.versionCode %>, <%- review.getLocationText(); %></small><br>
               <% if (review.deviceInfo.device) { %>
                 <span data-toggle="tooltip" data-placement="bottom" title="<%= review.getHumanFriendlyDeviceMetaData() %>">
                 <small><%- review.getDeviceInfo(); %></small>

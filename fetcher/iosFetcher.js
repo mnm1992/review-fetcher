@@ -5,86 +5,90 @@ const histogramCalculator = require('../common/histogramCalculator');
 
 module.exports = class IOSFetcher {
 
-  constructor(config) {
-    this.config = config;
-  }
+	constructor(config) {
+		this.config = config;
+	}
 
-  startFetching(callback) {
-    console.time('Fetched iOS reviews');
-    this.fetchReviews(function(reviews, histogram) {
-      console.log('Fetched: ' + reviews.length + ' iOS reviews');
-      console.timeEnd('Fetched iOS reviews');
-      callback(null, {
-        reviews: reviews,
-        histogram: histogram
-      });
-    });
-  }
+	startFetching(callback) {
+		if (this.config && Object.getOwnPropertyNames(this.config).length > 0) {
+			console.time('Fetched iOS reviews');
+			this.fetchReviews(function (reviews, histogram) {
+				console.log('Fetched: ' + reviews.length + ' iOS reviews');
+				console.timeEnd('Fetched iOS reviews');
+				callback(null, {
+					reviews: reviews,
+					histogram: histogram
+				});
+			});
+		} else {
+			callback(null, {});
+		}
+	}
 
-  fetchReviews(completion) {
-    const self = this;
-    const fetchActions = [];
-    var histograms = {};
+	fetchReviews(completion) {
+		const self = this;
+		const fetchActions = [];
+		var histograms = {};
 
-    self.config.countries.forEach(function(country) {
-      fetchActions.push(function(callback) {
-        self.fetchForCountry(country, callback);
-      });
-    });
+		self.config.countries.forEach(function (country) {
+			fetchActions.push(function (callback) {
+				self.fetchForCountry(country, callback);
+			});
+		});
 
-    async.parallel(fetchActions, function(err, results) {
-      var review_array = [];
-      var histograms = {};
-      if (results && results.length > 0) {
-        results.forEach(function(result) {
-          review_array = review_array.concat(result.reviews);
-          histograms = Object.assign(histograms, result.histogram);
-        });
-      }
-      completion(review_array, histograms);
-    });
-  }
+		async.parallel(fetchActions, function (err, results) {
+			var review_array = [];
+			var histograms = {};
+			if (results && results.length > 0) {
+				results.forEach(function (result) {
+					review_array = review_array.concat(result.reviews);
+					histograms = Object.assign(histograms, result.histogram);
+				});
+			}
+			completion(review_array, histograms);
+		});
+	}
 
-  fetchForCountry(country, completion) {
-    this.fetchRecursively([], country, 1, function(fetchedReviews) {
-      const returnValue = {
-        reviews: fetchedReviews,
-        histogram: {}
-      };
-      returnValue.histogram[country] = histogramCalculator.calculateHistogram(fetchedReviews, 'ios');
-      completion(null, returnValue);
-    });
-  }
+	fetchForCountry(country, completion) {
+		this.fetchRecursively([], country, 1, function (fetchedReviews) {
+			const returnValue = {
+				reviews: fetchedReviews,
+				histogram: {}
+			};
+			returnValue.histogram[country] = histogramCalculator.calculateHistogram(fetchedReviews, 'ios');
+			completion(null, returnValue);
+		});
+	}
 
-  fetchRecursively(allReviews, country, pageNumber, completion) {
-    const self = this;
+	fetchRecursively(allReviews, country, pageNumber, completion) {
+		const self = this;
 
-    request(this.getRequestURLForCountry(country, pageNumber), function(error, response, body) {
-      if (error || response.statusCode != 200) {
-        const text = error ? error : ('Status code was ' + response.statusCode + ' ' + pageNumber + ' Country is ' + country);
-        console.error(text);
-        completion(allReviews);
-        return;
-      }
+		request(this.getRequestURLForCountry(country, pageNumber), function (error, response, body) {
+			if (error || response.statusCode != 200) {
+				const text = error ? error : ('Status code was ' + response.statusCode + ' ' + pageNumber + ' Country is ' + country);
+				console.error(text);
+				completion(allReviews);
+				return;
+			}
 
-      rssParser.parse(self.config.id, body, country, function(parsedReviews, abort, lastPage) {
-        allReviews = allReviews.concat(parsedReviews);
-        if (allReviews.length === 0) {
-          completion(allReviews);
-          return;
-        }
+			rssParser.parse(self.config.id, body, country, function (parsedReviews, abort, lastPage) {
+				allReviews = allReviews.concat(parsedReviews);
+				if (allReviews.length === 0) {
+					completion(allReviews);
+					return;
+				}
 
-        if (pageNumber === parseInt(lastPage)) {
-          completion(allReviews);
-          return;
-        }
-        const nextPage = pageNumber + 1;
-        self.fetchRecursively(allReviews, country, nextPage, completion);
-      });
-    });
-  }
+				if (pageNumber === parseInt(lastPage)) {
+					completion(allReviews);
+					return;
+				}
+				const nextPage = pageNumber + 1;
+				self.fetchRecursively(allReviews, country, nextPage, completion);
+			});
+		});
+	}
 
-  getRequestURLForCountry(country, page) {
-    return 'https://itunes.apple.com/' + country + '/rss/customerreviews/page=' + page + '/id=' + this.config.id + '/sortby=mostrecent/xml';
-  }
+	getRequestURLForCountry(country, page) {
+		return 'https://itunes.apple.com/' + country + '/rss/customerreviews/page=' + page + '/id=' + this.config.id + '/sortby=mostrecent/xml';
+	}
 };

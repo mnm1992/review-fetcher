@@ -103,19 +103,26 @@ function createEmptyMap(start, stop) {
 	return map;
 }
 
+function removeReviewsWithInvalidDates(reviews) {
+	return reviews.filter((review) => {
+		return review.reviewInfo.dateTime;
+	});
+}
+
 function createMap(reviews) {
-	if (!reviews || reviews.length === 0) {
+	const filteredReviews = removeReviewsWithInvalidDates(reviews);
+	if (!filteredReviews || filteredReviews.length === 0) {
 		return {};
 	}
-	reviews.sort(sorter);
-	const lastDate = reviews[reviews.length - 1].reviewInfo.dateTime;
-	const firstDate = reviews[0].reviewInfo.dateTime;
+	filteredReviews.sort(sorter);
+	const lastDate = filteredReviews[filteredReviews.length - 1].reviewInfo.dateTime;
+	const firstDate = filteredReviews[0].reviewInfo.dateTime;
 	const map = createEmptyMap(firstDate, lastDate);
-	reviews.forEach(function (review) {
+	for (let review of filteredReviews) {
 		const date = review.reviewInfo.dateTime;
 		date.setHours(0, 0, 0, 0);
 		map[date].push(review);
-	});
+	}
 	return {
 		'first': firstDate,
 		'last': lastDate,

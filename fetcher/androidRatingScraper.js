@@ -6,15 +6,19 @@ module.exports = class AndroidRatingScraper {
 	}
 
 	startFetching(callback) {
-		console.time('Fetched Android ratings trough Scraping');
-		this.fetchRatings(function (total, averageRating, histogram) {
-			const ratingMetadata = {};
-			ratingMetadata.histogram = histogram;
-			ratingMetadata.total = total;
-			ratingMetadata.average = averageRating;
-			console.timeEnd('Fetched Android ratings trough Scraping');
-			callback(null, ratingMetadata);
-		});
+		if (this.config && Object.getOwnPropertyNames(this.config).length > 0) {
+			console.time('Fetched Android ratings trough Scraping');
+			this.fetchRatings(function (total, averageRating, histogram) {
+				const ratingMetadata = {};
+				ratingMetadata.histogram = histogram;
+				ratingMetadata.total = total;
+				ratingMetadata.average = averageRating;
+				console.timeEnd('Fetched Android ratings trough Scraping');
+				callback(null, ratingMetadata);
+			});
+		} else {
+			callback(null, {});
+		}
 	}
 
 	fetchRatings(callback) {

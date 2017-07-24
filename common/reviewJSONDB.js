@@ -3,14 +3,8 @@ const Review = require('./review');
 const pgp = require('pg-promise')({
 	capSQL: true
 });
-const connectionString = process.env.DATABASE_URL ? process.env.DATABASE_URL : {
-	host: 'localhost',
-	port: 5432,
-	database: 'postgres',
-	user: 'postgres',
-	password: 'postgres'
-};
-const db = pgp(connectionString);
+const configs = require('../common/configs');
+const db = pgp(configs.databaseConfig());
 const Column = pgp.helpers.Column;
 const reviewidColumn = new Column('?reviewid');
 const appidColumn = new Column('?appid');
@@ -64,7 +58,7 @@ function upsertAverageRating(app, ratingJSON, callback) {
 
 function getAllReviewsWithWhere(where, input, callback) {
 	const reviews = [];
-	db.any('SELECT deviceinfo, appinfo, reviewinfo, oldreviewinfo FROM reviewjson WHERE ' + where + ' ORDER BY reviewinfo->>\'dateTime\' desc', input)
+	db.any('SELECT deviceinfo, appinfo, reviewinfo, oldreviewinfo FROM reviewjson WHERE ' + where + ' ORDER BY reviewinfo->>\'dateTime\' desc NULLS LAST', input)
 		.then(function (result) {
 			result.forEach(function (review) {
 				if (review) {
@@ -72,8 +66,7 @@ function getAllReviewsWithWhere(where, input, callback) {
 					const appInfo = review.appinfo;
 					const reviewInfo = review.reviewinfo;
 					const oldReviewInfo = review.oldreviewinfo ? review.oldreviewinfo : {};
-					var createdReview = new Review(deviceInfo, appInfo, reviewInfo);
-					createdReview.oldReviewInfo = oldReviewInfo;
+					var createdReview = new Review(deviceInfo, appInfo, reviewInfo, oldReviewInfo);
 					reviews.push(createdReview);
 				}
 			});

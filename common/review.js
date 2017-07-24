@@ -5,12 +5,7 @@ const androidVersions = require('android-versions');
 
 module.exports = class Review {
 
-	constructor(deviceInfo, appInfo, reviewInfo) {
-		this.appInfo = appInfo;
-		this.reviewInfo = reviewInfo;
-		this.deviceInfo = deviceInfo;
-		this.oldReviewInfo = {};
-
+	constructor(deviceInfo, appInfo, reviewInfo, oldReviewInfo) {
 		if (!reviewInfo.author) {
 			reviewInfo.author = 'Anonymous';
 		}
@@ -23,9 +18,10 @@ module.exports = class Review {
 			reviewInfo.developerCommentDateTime = new Date(reviewInfo.developerCommentDateTime);
 		}
 
-		if (!reviewInfo.id) {
-			reviewInfo.id = hash([this.appInfo.id, this.reviewInfo.text, this.reviewInfo.title, this.reviewInfo.author, this.reviewInfo.dateTime, this.reviewInfo.rating, this.deviceInfo.language]);
-		}
+		this.appInfo = appInfo;
+		this.reviewInfo = reviewInfo;
+		this.deviceInfo = deviceInfo;
+		this.oldReviewInfo = oldReviewInfo ? oldReviewInfo : {};
 	}
 
 	getHumanFriendlyDeviceMetaData() {
@@ -43,7 +39,7 @@ module.exports = class Review {
 	}
 
 	getFormattedDeveloperReviewDate() {
-		return this.getFormattedDate(this.reviewInfo.developerCommentDateTime, this.reviewInfo.hasTime);
+		return this.getFormattedDate(this.reviewInfo.developerCommentDateTime, this.reviewInfo.developerCommentHasTime);
 	}
 
 	getFormattedReviewDate() {

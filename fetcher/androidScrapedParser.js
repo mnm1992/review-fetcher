@@ -42,6 +42,7 @@ module.exports = {
     if (json.replyDate) {
       const replyDateToParse = json.replyDate;
       reviewInfo.developerCommentDateTime = dateFormatGueser.guesDate(replyDateToParse, languageCode);
+      reviewInfo.developerCommentHasTime = false;
     }
     const dateStringToParse = json.date;
     reviewInfo.dateTime = dateFormatGueser.guesDate(dateStringToParse, languageCode);
