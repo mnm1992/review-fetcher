@@ -44,11 +44,15 @@ function uGrowConfig() {
 */
 
 module.exports = {
+	// Fill in whether the current machine is localhost.
+	// This is used to determine whether we should post reviews to slack or not
+	isLocalHost: function () {
+		return !(process.env.PORT);
+	},
 
-  /*
-  // Fill in how review fetcher should connect to your database.
-  // process.env.DATABASE_URL is the environment variable in which heroku stores the db connectionString
-  databaseConfig: function(){
+	// Fill in how review fetcher should connect to your database.
+	// process.env.DATABASE_URL is the environment variable in which heroku stores the db connectionString
+	databaseConfig: function () {
 		return process.env.DATABASE_URL ? process.env.DATABASE_URL : {
 			host: 'localhost',
 			port: 5432,
@@ -58,11 +62,16 @@ module.exports = {
 		}; // either a connectionString or a dictionary containing host, port, database, user, password
 	},
 
-  // If you are using heroku hosting you can fill in your heroku to get deployment info in the footer
-  // Please provide an empty string if you're not using heroku
-	herokuToken: function(){
+	// If you are using heroku hosting you can fill in your heroku to get deployment info in the footer
+	// Please provide an empty string if you're not using heroku
+	herokuToken: function () {
 		return '';
-	},*/
+	},
+
+	// Port on which the web server will be started
+	port: function () {
+		return process.env.PORT ? process.env.PORT : 8000;
+	},
 
 	// replace the word ugrow below with the appname you defined in the config above
 	/*configForApp: function (app) {

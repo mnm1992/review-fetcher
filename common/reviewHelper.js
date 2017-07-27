@@ -1,12 +1,14 @@
 function removeDuplicates(input, prioritisedType) {
 	const output = [];
 	const reviewMap = {};
-	input.forEach(function (review) {
-		const oldReview = reviewMap[review.reviewInfo.id];
-		if (!oldReview || (review.reviewInfo.source === prioritisedType)) {
-			reviewMap[review.reviewInfo.id] = review;
+	for (let review of input) {
+		if (review) {
+			const oldReview = reviewMap[review.reviewInfo.id];
+			if (!oldReview || (review.reviewInfo.source === prioritisedType)) {
+				reviewMap[review.reviewInfo.id] = review;
+			}
 		}
-	});
+	}
 	for (var key in reviewMap) {
 		output.push(reviewMap[key]);
 	}
@@ -77,12 +79,15 @@ module.exports = {
 			'reviewsToInsert': [],
 			'newReviews': []
 		};
-		const dbReviewMap = {};
-		reviewsFromDB.forEach(function (dbReview) {
-			dbReviewMap[dbReview.reviewInfo.id] = dbReview;
-		});
 
-		reviewsFetched.forEach(function (fetchedReview) {
+		const dbReviewMap = {};
+		for (let dbReview of reviewsFromDB) {
+			if (dbReview) {
+				dbReviewMap[dbReview.reviewInfo.id] = dbReview;
+			}
+		}
+
+		for (let fetchedReview of reviewsFetched) {
 			const foundReview = dbReviewMap[fetchedReview.reviewInfo.id];
 			if (!foundReview) {
 				result.newReviews.push(fetchedReview);
@@ -94,7 +99,7 @@ module.exports = {
 				}
 				result.reviewsToUpdate.push(mergedReview);
 			}
-		});
+		}
 		return result;
 	},
 };

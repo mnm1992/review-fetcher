@@ -105,27 +105,4 @@ module.exports = class Review {
 			'oldReview': this.oldReviewInfo
 		};
 	}
-
-	createReviewSlackText() {
-		var slackText = '';
-		slackText += this.deviceInfo.platform + ' ';
-		slackText += this.getRatingText();
-		slackText += ' on ' + this.getFormattedReviewDate() + '\n';
-		slackText += this.reviewInfo.title ? '\'' + this.reviewInfo.title + '\' - ' : '';
-		slackText += this.reviewInfo.author ? this.reviewInfo.author : '';
-		slackText += '\n';
-		slackText += this.reviewInfo.text + '\n';
-		if (this.appInfo.version && this.appInfo.versionCode) {
-			slackText += 'v' + this.appInfo.version + ', ' + this.appInfo.versionCode + ', ' + this.getLocationText() + '\n';
-			if (this.deviceInfo.device) {
-				slackText += this.getDeviceInfo();
-			}
-		} else if (this.appInfo.version) {
-			slackText += 'v' + this.appInfo.version + ', ' + this.getLocationText();
-		} else {
-			slackText += this.getLocationText();
-		}
-		slackText += '\n\n';
-		return slackText;
-	}
 };

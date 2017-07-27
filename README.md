@@ -24,7 +24,7 @@ How to set it up locally?
 Install node and postgres
 
 ### Setting up DB
-Configure postgres with user:postgres password:postgres database postgres (You can change/specify the credentials at: configs.js line 53 till 57)
+Configure postgres with user:postgres password:postgres database postgres (You can change this at: ReviewJSONDB.js line 5 till 9)
 Create the table as specified in dbStructure. You can do this automatically by running setupDB or run the command manually in the psql commandline.
 
 ### Setting up the configuration

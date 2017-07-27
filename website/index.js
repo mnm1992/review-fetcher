@@ -9,6 +9,7 @@ const appPage = require('./appPage');
 const responseHelper = require('./responseHelper');
 const express = require('express');
 const compression = require('compression');
+const configs = require('../common/configs');
 const app = express();
 
 app.use(compression());
@@ -26,7 +27,7 @@ app.get('/:app/export/csv', exportPage.exportCSV);
 app.get('/:app/export/json', exportPage.exportJSON);
 app.get('/:app/export/xml', exportPage.exportXML);
 app.get('/:app', appPage.render);
-app.listen(process.env.PORT || 8000, null);
+app.listen(configs.port(), null);
 
 function getLogo(request, response) {
 	responseHelper.sendImage("/images/ugrow/logo.png", response);

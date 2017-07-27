@@ -100,7 +100,7 @@ function start(completion) {
 					ratingJSON.iosVersions = iosVersions;
 					ratingJSON.countries = countries;
 					addRatingsToDB(config, ratingJSON, function () {
-						const slackHelper = new SlackHelper(config.slackConfig);
+						const slackHelper = new SlackHelper(config.slackConfig, configs.isLocalHost());
 						slackHelper.shareOnSlack(newReviews, function () {
 							console.timeEnd('Finished ' + config.appName);
 							callback();
