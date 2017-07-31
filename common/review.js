@@ -18,6 +18,12 @@ module.exports = class Review {
 			reviewInfo.developerCommentDateTime = new Date(reviewInfo.developerCommentDateTime);
 		}
 
+		if (deviceInfo.languageCode === 'zh-CN') {
+			deviceInfo.language = 'Chinese (Traditional)';
+		} else if (deviceInfo.languageCode === 'zh-TW' || deviceInfo.languageCode === 'zh-CHT' || deviceInfo.languageCode === 'zh-CHS') {
+			deviceInfo.language = 'Chinese (Simplified)';
+		}
+
 		this.appInfo = appInfo;
 		this.reviewInfo = reviewInfo;
 		this.deviceInfo = deviceInfo;

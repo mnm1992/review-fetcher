@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.2.0/milligram.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
   <link rel="icon" type="image/png" href="/<%= appName.toLowerCase() %>/images/favicon.png">
   <link rel="stylesheet" href="/style.css" />
 </head>
@@ -53,31 +54,33 @@
     <div style="clear:both;"></div>
 
     <% reviews.forEach(function(review){ %>
-        <h5><%- review.deviceInfo.platform %> <%- review.getRatingText(); %> on <%- review.getFormattedReviewDate(); %></h5>
-        <p>
-            <% const title = review.reviewInfo.title?"<em>\"" + review.reviewInfo.title + "\"</em> - " : "" %>
-            <%- title %><%- review.reviewInfo.author %><br>
-            <%- review.reviewInfo.text %><br>
-            <% if (review.appInfo.version && review.appInfo.versionCode) { %>
-              <small>v<%- review.appInfo.version %> , <%- review.appInfo.versionCode %>, <%- review.getLocationText(); %></small><br>
-              <% if (review.deviceInfo.device) { %>
-                <span data-toggle="tooltip" data-placement="bottom" title="<%= review.getHumanFriendlyDeviceMetaData() %>">
-                <small><%- review.getDeviceInfo(); %></small>
-              <% } %>
-            </span>
-            <% } else if (review.appInfo.version) { %>
-              <small>v<%- review.appInfo.version %> , <%- review.getLocationText(); %></small>
-            <% } else { %>
-              <small><%- review.getLocationText(); %></small>
+      <% const platformIcon =  review.deviceInfo.platform == 'Android'? 'fa-android' : 'fa-apple'%>
+      <h5><%- review.getRatingText(); %> on <%- review.getFormattedReviewDate(); %></h5>
+      <p>
+          <% const title = review.reviewInfo.title?"<em>\"" + review.reviewInfo.title + "\"</em> - " : "" %>
+          <%- title %><%- review.reviewInfo.author %><br>
+          <%- review.reviewInfo.text %><br>
+          <small><i class="fa <%- platformIcon %>" aria-hidden="true"></i> </small>
+          <% if (review.appInfo.version && review.appInfo.versionCode) { %>
+            <small>v<%- review.appInfo.version %> , <%- review.appInfo.versionCode %>, <%- review.getLocationText(); %></small><br>
+            <% if (review.deviceInfo.device) { %>
+              <span data-toggle="tooltip" data-placement="bottom" title="<%= review.getHumanFriendlyDeviceMetaData() %>">
+              <small><%- review.getDeviceInfo(); %></small>
             <% } %>
-            <% if (review.reviewInfo.developerCommentDateTime) { %>
-              <blockquote><em>
-              <%= companyName %> responded on <%- review.getFormattedDeveloperReviewDate() %>
-              <br>
-              <%- review.reviewInfo.developerComment %>
-            </em></blockquote>
-            <% } %>
-        </p>
+          </span>
+          <% } else if (review.appInfo.version) { %>
+            <small>v<%- review.appInfo.version %> , <%- review.getLocationText(); %></small>
+          <% } else { %>
+            <small><%- review.getLocationText(); %></small>
+          <% } %>
+          <% if (review.reviewInfo.developerCommentDateTime) { %>
+            <blockquote><em>
+            <%= companyName %> responded on <%- review.getFormattedDeveloperReviewDate() %>
+            <br>
+            <%- review.reviewInfo.developerComment %>
+          </em></blockquote>
+          <% } %>
+      </p>
     <% }); %>
   </div>
   <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>

@@ -10,6 +10,7 @@ const AndroidFetcher = require('./androidFetcher');
 const ReviewJSONDB = require('../common/reviewJSONDB');
 const reviewDB = new ReviewJSONDB();
 const SlackHelper = require('./slackHelper');
+const ReviewTranslator = require('./reviewTranslator');
 
 function checkForNewReviews(config, completion) {
 	const iOSFetcher = new IOSFetcher(config.iOSConfig);
@@ -48,17 +49,13 @@ function checkForNewReviews(config, completion) {
 }
 
 function addReviewsToDB(config, reviews, callback) {
-	console.time('Storing data in db');
 	reviewDB.addNewReviews(config, reviews, function (newReviews, countries, androidVersions, iosVersions) {
-		console.timeEnd('Storing data in db');
 		callback(newReviews, countries, androidVersions, iosVersions);
 	});
 }
 
 function addRatingsToDB(config, ratingJSON, callback) {
-	console.time('Storing ratings in db');
 	reviewDB.updateRating(config.appName, ratingJSON, function () {
-		console.timeEnd('Storing ratings in db');
 		callback();
 	});
 }
@@ -87,6 +84,16 @@ function startScraping(completion) {
 	});
 }
 
+function mergeNewReviewsAndReviewToInsert(newReviews, toInsert) {
+	for (var review of newReviews) {
+		var index = toInsert.indexOf(review);
+		if (index !== -1) {
+			toInsert[index] = review;
+		}
+	}
+	return toInsert;
+}
+
 function start(completion) {
 	console.time('Total time');
 	const allAppConfigs = configs.allConfigs();
@@ -95,15 +102,32 @@ function start(completion) {
 		checkReviewsForAllConfigs.push(function (callback) {
 			console.time('Finished ' + config.appName);
 			checkForNewReviews(config, function (reviews, ratingJSON) {
-				addReviewsToDB(config, reviews, function (newReviews, countries, androidVersions, iosVersions) {
-					ratingJSON.androidVersions = androidVersions;
-					ratingJSON.iosVersions = iosVersions;
-					ratingJSON.countries = countries;
-					addRatingsToDB(config, ratingJSON, function () {
-						const slackHelper = new SlackHelper(config.slackConfig, configs.isLocalHost());
-						slackHelper.shareOnSlack(newReviews, function () {
-							console.timeEnd('Finished ' + config.appName);
-							callback();
+				console.time('Fetched all reviews from db');
+				reviewDB.getAllReviews(config, function (reviewsFromDB) {
+					console.timeEnd('Fetched all reviews from db');
+					const countries = reviewHelper.appCountries(reviewsFromDB);
+					const androidVersions = reviewHelper.appVersions(reviewsFromDB, 'android');
+					const iosVersions = reviewHelper.appVersions(reviewsFromDB, 'ios');
+					const cleanReviews = reviewHelper.mergeReviewsFromArrays(reviewsFromDB, reviews);
+					console.log('Reviews in db: ' + (reviewsFromDB ? reviewsFromDB.length : 0));
+					console.log('Reviews fetched: ' + (reviews ? reviews.length : 0));
+					console.log('New reviews: ' + cleanReviews.newReviews.length);
+					const reviewTranslator = new ReviewTranslator();
+					reviewTranslator.translateAllReviews(cleanReviews.newReviews, (translatedNewReviews) => {
+						translatedNewReviews = translatedNewReviews ? translatedNewReviews : [];
+						cleanReviews.reviewsToInsert = mergeNewReviewsAndReviewToInsert(translatedNewReviews, cleanReviews.reviewsToInsert);
+						cleanReviews.newReviews = translatedNewReviews;
+						addReviewsToDB(config, cleanReviews, () => {
+							ratingJSON.androidVersions = androidVersions;
+							ratingJSON.iosVersions = iosVersions;
+							ratingJSON.countries = countries;
+							addRatingsToDB(config, ratingJSON, () => {
+								const slackHelper = new SlackHelper(config.slackConfig, configs.isLocalHost());
+								slackHelper.shareOnSlack(translatedNewReviews, () => {
+									console.timeEnd('Finished ' + config.appName);
+									callback();
+								});
+							});
 						});
 					});
 				});

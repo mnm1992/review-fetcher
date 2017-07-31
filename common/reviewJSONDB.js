@@ -156,30 +156,10 @@ module.exports = class ReviewJSONDB {
 		getAllReviewsWithWhere('appid = $1 OR appid = $2', [config.androidConfig.id, config.iOSConfig.id], callback);
 	}
 
-	addNewReviews(config, reviewsFetched, callback) {
-		if (!reviewsFetched) {
-			console.log('No new reviews');
-			callback([]);
-			return;
-		}
-		console.time('Fetched all reviews');
-		this.getAllReviews(config, function (reviewsFromDB) {
-			console.timeEnd('Fetched all reviews');
-			const countries = reviewHelper.appCountries(reviewsFromDB);
-			const androidVersions = reviewHelper.appVersions(reviewsFromDB, 'android');
-			const iosVersions = reviewHelper.appVersions(reviewsFromDB, 'ios');
-			const cleanReviews = reviewHelper.mergeReviewsFromArrays(reviewsFromDB, reviewsFetched);
-			console.log('Reviews in db: ' + (reviewsFromDB ? reviewsFromDB.length : 0));
-			console.log('Reviews fetched: ' + (reviewsFetched ? reviewsFetched.length : 0));
-			console.log('New reviews: ' + cleanReviews.newReviews.length);
-			console.time('Inserted all reviews');
-			blukInsert(cleanReviews.reviewsToInsert, function () {
-				console.timeEnd('Inserted all reviews');
-				console.time('Updated all reviews');
-				blukUpdate(cleanReviews.reviewsToUpdate, function () {
-					console.timeEnd('Updated all reviews');
-					callback(cleanReviews.newReviews, countries, androidVersions, iosVersions);
-				});
+	addNewReviews(config, cleanReviews, callback) {
+		blukInsert(cleanReviews.reviewsToInsert, () => {
+			blukUpdate(cleanReviews.reviewsToUpdate, () => {
+				callback();
 			});
 		});
 	}

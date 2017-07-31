@@ -2,40 +2,13 @@ const slackLibrary = require('slack-node');
 const slack = new slackLibrary();
 const translate = require('google-translate-api');
 const async = require('async');
+const request = require('request');
 
 module.exports = class SlackHelper {
 
 	constructor(config, isLocalHost) {
 		this.config = config;
 		this.isLocalHost = isLocalHost;
-	}
-
-	translateReview(reviewTitle, reviewText, from, completion) {
-		if (from === 'en') {
-			completion(undefined, undefined);
-			return;
-		}
-		const splitChar = '1958745213654789';
-		const stringToTranslate = reviewTitle + splitChar + reviewText
-		const options = {
-			to: 'en'
-		};
-		if (from) {
-			options.from = from;
-		}
-		translate(stringToTranslate, options).then(res => {
-			if (res.from.language.iso === 'en') {
-				completion(undefined, undefined);
-				return;
-			}
-			const results = res.text.split(splitChar);
-			const translatedTitle = results[0];
-			const translatedText = results[1];
-			completion(translatedTitle, translatedText);
-		}).catch(err => {
-			console.error(err);
-			completion(undefined, undefined);
-		});
 	}
 
 	shareOnSlack(reviews, completion) {
@@ -66,9 +39,20 @@ module.exports = class SlackHelper {
 		const self = this;
 		for (let review of filteredReviews) {
 			reviewPostFunctions.push(function (callback) {
-				self.translateReview(review.reviewInfo.title, review.reviewInfo.text, review.deviceInfo.languageCode, function (translatedTitle, translatedText) {
-					self.postToSlack(self.createReviewSlackText(review, translatedTitle, translatedText), callback);
-				});
+				if (self.config.token) {
+					self.postToSlackAPI(review, review.reviewInfo.translatedTitle, review.reviewInfo.translatedText, callback);
+				} else {
+					var slackText = self.createReviewSlackText(review, review.reviewInfo.title, review.reviewInfo.text);
+					if (review.reviewInfo.translatedText) {
+						slackText += '\n\nTranslation:\n';
+						if (review.reviewInfo.translatedTitle) {
+							slackText += review.reviewInfo.translatedTitle + '\n';
+						}
+						slackText += review.reviewInfo.translatedText;
+						slackText += '\n\n';
+					}
+					self.postToSlackViaHook(slackText, callback);
+				}
 			});
 		}
 		async.parallel(reviewPostFunctions, function (err, results) {
@@ -77,7 +61,7 @@ module.exports = class SlackHelper {
 		});
 	}
 
-	postToSlack(text, callback) {
+	postToSlackViaHook(text, callback) {
 		slack.setWebhook(this.config.hook);
 		slack.webhook({
 			channel: this.config.channel,
@@ -91,15 +75,57 @@ module.exports = class SlackHelper {
 		});
 	}
 
-	createReviewSlackText(review, translatedTitle, translatedText) {
+	postToSlack(config, text, ts, callback) {
+		const postBody = {
+			token: config.token,
+			channel: config.channel,
+			text: text,
+			username: config.botName,
+			icon_url: 'https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2017-04-24/173574796596_142629a22f10e01a7481_72.png'
+		};
+		if (ts) {
+			postBody.thread_ts = ts;
+		}
+		request({
+			method: "post",
+			form: postBody,
+			url: "https://slack.com/api/chat.postMessage",
+			headers: {
+				"Content-Type": "application/x-www-form-urlencoded"
+			},
+		}, function (requestError, response, body) {
+			if (!requestError) {
+				callback(JSON.parse(body).message.ts);
+			} else {
+				callback(undefined);
+			}
+		});
+	}
+
+	postToSlackAPI(review, translatedTitle, translatedText, callback) {
+		const config = this.config;
+		const self = this;
+		var text = self.createReviewSlackText(review, review.reviewInfo.title, review.reviewInfo.text);
+
+		this.postToSlack(config, text, undefined, (ts) => {
+			var text = self.createReviewSlackText(review, translatedTitle, translatedText);
+			if (ts && translatedText) {
+				this.postToSlack(config, text, ts, (ts) => {
+					callback();
+				});
+			}
+		});
+	}
+
+	createReviewSlackText(review, title, text) {
 		var slackText = '';
 		slackText += review.deviceInfo.platform + ' ';
 		slackText += review.getRatingText();
 		slackText += ' on ' + review.getFormattedReviewDate() + '\n';
-		slackText += review.reviewInfo.title ? '\'' + review.reviewInfo.title + '\' - ' : '';
+		slackText += title ? '\'' + title + '\' - ' : '';
 		slackText += review.reviewInfo.author ? review.reviewInfo.author : '';
 		slackText += '\n';
-		slackText += review.reviewInfo.text + '\n';
+		slackText += text + '\n';
 		if (review.appInfo.version && review.appInfo.versionCode) {
 			slackText += 'v' + review.appInfo.version + ', ' + review.appInfo.versionCode + ', ' + review.getLocationText() + '\n';
 			if (review.deviceInfo.device) {
@@ -109,14 +135,6 @@ module.exports = class SlackHelper {
 			slackText += 'v' + review.appInfo.version + ', ' + review.getLocationText();
 		} else {
 			slackText += review.getLocationText();
-		}
-		if (translatedText) {
-			slackText += '\n\nTranslation:\n';
-			if (translatedTitle) {
-				slackText += translatedTitle + '\n';
-			}
-			slackText += translatedText;
-			slackText += '\n\n';
 		}
 		return slackText;
 	}
