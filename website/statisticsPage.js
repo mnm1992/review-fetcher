@@ -1,6 +1,7 @@
 const emojiFlags = require('emoji-flags');
 const responseHelper = require('./responseHelper');
-const configs = require('../common/configs');
+const Configs = require('../common/configs');
+const configs = new Configs();
 const humanizeDuration = require('humanize-duration');
 const histogramCalculator = require('../common/histogramCalculator');
 const ReviewJSONDB = require('../common/reviewJSONDB');
@@ -11,7 +12,7 @@ module.exports = {
 	render: function (request, response) {
 		const config = configs.configForApp(request.params.app.toLowerCase());
 		if (config === null) {
-			responseHelper.notFound(response, 'proposition not found');
+			responseHelper.notFound(response, 'Statistics page: proposition not found');
 			return;
 		}
 		responseHelper.getDefaultParams(config, reviewDB, function (ratingJSON, defaultParams) {
@@ -32,6 +33,8 @@ function constructStatsPage(config, ratingJSON, defaultParams, response) {
 			iosCountryStats: constructCountriesMap(reviews, ratingJSON, 'ios'),
 			versionStats: constructVersionMap(reviews),
 			languageStats: constructLanguagesMap(reviews),
+			androidLanguageStats: constructLanguagesMap(reviews, 'android'),
+			iOSLanguageStats: constructLanguagesMap(reviews, 'ios'),
 			timingStats: generateTimeReviewSummary(reviews)
 		};
 		response.render('statistics', Object.assign(statisticsProperties, defaultParams));
@@ -114,8 +117,8 @@ function calculateAverageMap(reviews, codeParentKey, codeKey, nameParentKey, nam
 	return averageDictionary;
 }
 
-function constructLanguagesMap(reviews) {
-	return Object.values(calculateAverageMap(reviews, 'deviceInfo', 'languageCode', 'deviceInfo', 'language'));
+function constructLanguagesMap(reviews, platform) {
+	return Object.values(calculateAverageMap(reviews, 'deviceInfo', 'languageCode', 'deviceInfo', 'language', platform));
 }
 
 function constructCountriesMap(reviews, ratingJSON, platform) {

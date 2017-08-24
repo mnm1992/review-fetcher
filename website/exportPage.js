@@ -1,5 +1,6 @@
 const responseHelper = require('./responseHelper');
-const configs = require('../common/configs');
+const Configs = require('../common/configs');
+const configs = new Configs();
 const ReviewJSONDB = require('../common/reviewJSONDB');
 const reviewDB = new ReviewJSONDB();
 const json2csv = require('json2csv');
@@ -15,7 +16,7 @@ module.exports = {
 	exportJSON: function (request, response) {
 		const config = configs.configForApp(request.params.app.toLowerCase());
 		if (config === null) {
-			responseHelper.notFound(response, 'proposition not found');
+			responseHelper.notFound(response, 'Export JSON: proposition not found');
 			return;
 		}
 		constructJSONDump(config, response);
@@ -24,7 +25,7 @@ module.exports = {
 	exportXML: function (request, response) {
 		const config = configs.configForApp(request.params.app.toLowerCase());
 		if (config === null) {
-			responseHelper.notFound(response, 'proposition not found');
+			responseHelper.notFound(response, 'Export xml: proposition not found');
 			return;
 		}
 		constructXMLDump(config, response);
@@ -33,7 +34,7 @@ module.exports = {
 	exportCSV: function (request, response) {
 		const config = configs.configForApp(request.params.app.toLowerCase());
 		if (config === null) {
-			responseHelper.notFound(response, 'proposition not found');
+			responseHelper.notFound(response, 'Export CSV: proposition not found');
 			return;
 		}
 		constructCSVDump(config, response);

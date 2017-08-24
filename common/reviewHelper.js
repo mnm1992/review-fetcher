@@ -20,11 +20,11 @@ function mergeReviews(dbReview, fetchedReview) {
 	const olderReview = (laterReview === dbReview) ? fetchedReview : dbReview;
 	if (laterReview.reviewInfo.dateTime > olderReview.reviewInfo.dateTime) {
 		if (laterReview === fetchedReview) {
-			laterReview.oldReviewInfo = {};
-			laterReview.oldReviewInfo.reviewInfo = olderReview.reviewInfo;
-			laterReview.oldReviewInfo.deviceInfo = olderReview.deviceInfo;
-			laterReview.oldReviewInfo.appInfo = olderReview.appInfo;
+			const copiedReview = olderReview.getJSON();
+			copiedReview.oldReviewInfo = undefined;
+			laterReview.oldReviewInfo.push(copiedReview);
 			laterReview.showOnSlack = true;
+			laterReview.updated = true;
 			console.log('A review got updated it moved from: ' + olderReview.reviewInfo.dateTime + ' to ' + laterReview.reviewInfo.dateTime);
 		} else if (olderReview.reviewInfo.developerComment && !laterReview.reviewInfo.developerComment) {
 			console.log("Found a developer comment I didn't have before at " + olderReview.reviewInfo.dateTime);
@@ -60,16 +60,37 @@ module.exports = {
 		const appCountries = [];
 		reviews.forEach(function (review) {
 			if (review.deviceInfo.countryCode && !countryCodes.includes(review.deviceInfo.countryCode)) {
-				const codeCountryMap = {};
-				codeCountryMap[review.deviceInfo.countryCode] = review.deviceInfo.country;
+				const codeCountryMap = {
+					name: review.deviceInfo.country,
+					code: review.deviceInfo.countryCode
+				};
 				appCountries.push(codeCountryMap);
 				countryCodes.push(review.deviceInfo.countryCode);
 			}
 		});
 		appCountries.sort((obj1, obj2) => {
-			return Object.keys(obj1)[0] > Object.keys(obj2)[0];
+			return obj1.name.localeCompare(obj2.name);
 		});
 		return appCountries;
+	},
+
+	appLanguages: function (reviews) {
+		const languageCodes = [];
+		const appLanguages = [];
+		reviews.forEach(function (review) {
+			if (review.deviceInfo.languageCode && !languageCodes.includes(review.deviceInfo.languageCode)) {
+				const codeLanguageMap = {
+					name: review.deviceInfo.language,
+					code: review.deviceInfo.languageCode
+				};
+				appLanguages.push(codeLanguageMap);
+				languageCodes.push(review.deviceInfo.languageCode);
+			}
+		});
+		appLanguages.sort((obj1, obj2) => {
+			return obj1.name.localeCompare(obj2.name);
+		});
+		return appLanguages;
 	},
 
 	mergeReviewsFromArrays: function (reviewsFromDB, reviewsFetched) {
@@ -94,10 +115,10 @@ module.exports = {
 				result.reviewsToInsert.push(fetchedReview);
 			} else {
 				const mergedReview = mergeReviews(foundReview, fetchedReview);
-				if (mergedReview.showOnSlack) {
+				if (mergedReview.updated) {
 					result.newReviews.push(mergedReview);
+					result.reviewsToUpdate.push(mergedReview);
 				}
-				result.reviewsToUpdate.push(mergedReview);
 			}
 		}
 		return result;

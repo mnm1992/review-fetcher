@@ -45,8 +45,9 @@ a:hover {
 </style>
 
 <nav class="navbar navbar-toggleable-md navbar-inverse bg-inverse">
-  <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" style="border-color: white;">
-    <i class="fa fa-bars"></i>
+  <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarNav"
+          aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" style="border-color: white;">
+    <i class="fa fa-bars" style="margin-left: 5px; margin-right: 5px;"></i>
   </button>
   <% if(appName === 'uGrow'){ %>
     <a class="navbar-brand" href="/<%= appName.toLowerCase() %>">
@@ -82,11 +83,24 @@ a:hover {
         <span class="caret"></span></a>
         <ul class="dropdown-content dropdown-menu">
           <% if ( typeof countries != 'undefined') { %>
-            <% 	countries.forEach(function (country) { %>
-            <% 	const countryCode = Object.keys(country)[0]; %>
-            <% 	const countryName = country[countryCode];  %>
+            <% 	for(var country of countries){ %>
+            <% 	const countryCode = country.code; %>
+            <% 	const countryName = country.name;  %>
               <li><a href="/<%= appName.toLowerCase() %>/country/<%= countryCode.toLowerCase() %>"><big><%= countryName %></big></a></li>
-            <% 	}); %>
+            <% 	} %>
+          <% } %>
+        </ul>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="">Languages
+        <span class="caret"></span></a>
+        <ul class="dropdown-content dropdown-menu">
+          <% if ( typeof languages != 'undefined') { %>
+            <% 	for(var language of languages){ %>
+            <% 	const languageCode = language.code; %>
+            <% 	const languageName = language.name;  %>
+              <li><a href="/<%= appName.toLowerCase() %>/language/<%= languageCode.toLowerCase() %>"><big><%= languageName %></big></a></li>
+            <% 	} %>
           <% } %>
         </ul>
       </li>
@@ -94,15 +108,15 @@ a:hover {
         <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="">Versions
         <span class="caret"></span></a>
         <ul class="dropdown-content dropdown-menu">
-          <% if ( typeof androidVersions != 'undefined') { %>
-            <% 	androidVersions.forEach(function (version) { %>
-              <li><a href="/<%= appName.toLowerCase() %>/android/version/<%= version.toLowerCase() %>"><big>Android <%= version %></big></a></li>
-            <% 	}); %>
-          <% } %>
           <% if ( typeof iosVersions != 'undefined') { %>
-            <% 	iosVersions.forEach(function (version) { %>
+            <% 	for(var version of iosVersions){ %>
               <li><a href="/<%= appName.toLowerCase() %>/ios/version/<%= version.toLowerCase() %>"><big>iOS <%= version %></big></a></li>
-            <% 	}); %>
+            <% 	} %>
+          <% } %>
+          <% if ( typeof androidVersions != 'undefined') { %>
+            <% 	for(var version of androidVersions){ %>
+              <li><a href="/<%= appName.toLowerCase() %>/android/version/<%= version.toLowerCase() %>"><big>Android <%= version %></big></a></li>
+            <% 	} %>
           <% } %>
         </ul>
       </li>

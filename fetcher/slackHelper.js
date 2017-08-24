@@ -12,12 +12,6 @@ module.exports = class SlackHelper {
 	}
 
 	shareOnSlack(reviews, completion) {
-		if (this.isLocalHost) {
-			console.log('Not posting to Slack since this is localhost');
-			completion();
-			return;
-		}
-
 		if (!this.config.hook || !this.config.channel || !this.config.botName) {
 			console.log('No slack hook configured');
 			completion();
@@ -43,7 +37,7 @@ module.exports = class SlackHelper {
 					self.postToSlackAPI(review, review.reviewInfo.translatedTitle, review.reviewInfo.translatedText, callback);
 				} else {
 					var slackText = self.createReviewSlackText(review, review.reviewInfo.title, review.reviewInfo.text);
-					if (review.reviewInfo.translatedText) {
+					if (review.reviewInfo.translatedText && review.deviceInfo.languageCode !== 'en') {
 						slackText += '\n\nTranslation:\n';
 						if (review.reviewInfo.translatedTitle) {
 							slackText += review.reviewInfo.translatedTitle + '\n';
@@ -95,8 +89,14 @@ module.exports = class SlackHelper {
 			},
 		}, function (requestError, response, body) {
 			if (!requestError) {
-				callback(JSON.parse(body).message.ts);
+				const message = JSON.parse(body).message;
+				if (message) {
+					callback(message.ts);
+				} else {
+					callback(undefined);
+				}
 			} else {
+				console.error('Error posting reviews to Slack: ' + requestError);
 				callback(undefined);
 			}
 		});
@@ -109,16 +109,18 @@ module.exports = class SlackHelper {
 
 		this.postToSlack(config, text, undefined, (ts) => {
 			var text = self.createReviewSlackText(review, translatedTitle, translatedText);
-			if (ts && translatedText) {
+			if (ts && translatedText && review.deviceInfo.languageCode !== 'en') {
 				this.postToSlack(config, text, ts, (ts) => {
 					callback();
 				});
+			} else {
+				callback();
 			}
 		});
 	}
 
 	createReviewSlackText(review, title, text) {
-		var slackText = '';
+		var slackText = review.updated ? 'Updated: ' : '';
 		slackText += review.deviceInfo.platform + ' ';
 		slackText += review.getRatingText();
 		slackText += ' on ' + review.getFormattedReviewDate() + '\n';

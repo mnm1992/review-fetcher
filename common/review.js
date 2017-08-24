@@ -18,16 +18,17 @@ module.exports = class Review {
 			reviewInfo.developerCommentDateTime = new Date(reviewInfo.developerCommentDateTime);
 		}
 
-		if (deviceInfo.languageCode === 'zh-CN') {
-			deviceInfo.language = 'Chinese (Traditional)';
-		} else if (deviceInfo.languageCode === 'zh-TW' || deviceInfo.languageCode === 'zh-CHT' || deviceInfo.languageCode === 'zh-CHS') {
-			deviceInfo.language = 'Chinese (Simplified)';
-		}
-
 		this.appInfo = appInfo;
 		this.reviewInfo = reviewInfo;
 		this.deviceInfo = deviceInfo;
-		this.oldReviewInfo = oldReviewInfo ? oldReviewInfo : {};
+		this.oldReviewInfo = oldReviewInfo;
+		if (!oldReviewInfo) {
+			this.oldReviewInfo = [];
+		}
+	}
+
+	isEnglish() {
+		return this.deviceInfo.languageCode === 'en';
 	}
 
 	getHumanFriendlyDeviceMetaData() {
@@ -53,7 +54,7 @@ module.exports = class Review {
 	}
 
 	getFormattedDate(date, hastime) {
-		dateLib.locale('nl');
+		dateLib.locale('en');
 		if (date) {
 			if (hastime) {
 				return dateLib.format(date, 'DD MMM YYYY HH:mm:ss');
@@ -103,6 +104,13 @@ module.exports = class Review {
 		return this.getDeviceModelInfo() + ', ' + this.getDeviceVersionInfo();
 	}
 
+	getOldReview() {
+		if (this.oldReviewInfo && this.oldReviewInfo[0]) {
+			return new Review(this.oldReviewInfo[0].deviceInfo, this.oldReviewInfo[0].appInfo, this.oldReviewInfo[0].reviewInfo, this.oldReviewInfo[0].oldReview);
+		}
+		return null;
+	}
+
 	getJSON() {
 		return {
 			'deviceInfo': this.deviceInfo,
@@ -110,5 +118,50 @@ module.exports = class Review {
 			'reviewInfo': this.reviewInfo,
 			'oldReview': this.oldReviewInfo
 		};
+	}
+
+	getHistory() {
+		var counter = 0;
+		var text = "";
+		var currentReview = this;
+		while (currentReview) {
+			text += currentReview.getHTML();
+			currentReview = currentReview.getOldReview();
+		}
+		return text;
+	}
+
+	getHTML(translate) {
+		const platformIcon = this.deviceInfo.platform == 'Android' ? 'fa-android' : 'fa-apple';
+		var htmlText = "<h5>" + this.getRatingText() + " on " + this.getFormattedReviewDate() + "</h5>";
+		htmlText += "<p>";
+		const title = (typeof translate != 'undefined') ? this.reviewInfo.translatedTitle : this.reviewInfo.title;
+		const text = (typeof translate != 'undefined') ? this.reviewInfo.translatedText : this.reviewInfo.text;
+		const titleHTML = title ? "<em>\"" + title + "\"</em> - " : "";
+		htmlText += titleHTML + this.reviewInfo.author + "<br>";
+		htmlText += text + "<br>";
+		htmlText += "<small><i class=\"fa " + platformIcon + "\" aria-hidden=\"true\"></i> </small>";
+		if (this.appInfo.version && this.appInfo.versionCode) {
+			htmlText += "<small>v" + this.appInfo.version + ", " + this.appInfo.versionCode + ", " + this.getLocationText() + "</small><br>";
+			if (this.deviceInfo.device) {
+				htmlText += "<span data-toggle=\"tooltip\" data-placement=\"bottom\" title=\"" + this.getHumanFriendlyDeviceMetaData() + "\">";
+				htmlText += ("<small>" + this.getDeviceInfo() + "</small>");
+			}
+			htmlText += "</span>";
+		} else if (this.appInfo.version) {
+			htmlText += "<small>v"
+			htmlText += this.appInfo.version + ", " + this.getLocationText() + "</small>";
+		} else {
+			htmlText += "<small>" + this.getLocationText() + "</small>";
+		}
+		if (this.reviewInfo.developerCommentDateTime) {
+			htmlText += "<blockquote><em>";
+			htmlText += "Philips" + " responded on " + this.getFormattedDeveloperReviewDate();
+			htmlText += "<br>";
+			htmlText += this.reviewInfo.developerComment;
+			htmlText += "</em></blockquote>";
+		}
+		htmlText += "</p>";
+		return htmlText;
 	}
 };

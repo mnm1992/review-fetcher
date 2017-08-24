@@ -1,6 +1,7 @@
 const dateLib = require('date-and-time');
 const request = require('request');
-const configs = require('../common/configs');
+const Configs = require('../common/configs');
+const configs = new Configs();
 const token = configs.herokuToken();
 const options = {
   url: 'https://api.heroku.com/apps/review-fetcher/releases',

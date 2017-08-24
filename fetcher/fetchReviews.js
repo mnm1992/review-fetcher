@@ -1,5 +1,6 @@
 const async = require('async');
-const configs = require('../common/configs');
+const Configs = require('../common/configs');
+const configs = new Configs();
 const histogramCalculator = require('../common/histogramCalculator');
 const reviewHelper = require('../common/reviewHelper');
 const IOSFetcher = require('./iosFetcher');
@@ -11,6 +12,7 @@ const ReviewJSONDB = require('../common/reviewJSONDB');
 const reviewDB = new ReviewJSONDB();
 const SlackHelper = require('./slackHelper');
 const ReviewTranslator = require('./reviewTranslator');
+const notifyWebsite = require('./NotifyWebsite');
 
 function checkForNewReviews(config, completion) {
 	const iOSFetcher = new IOSFetcher(config.iOSConfig);
@@ -106,6 +108,7 @@ function start(completion) {
 				reviewDB.getAllReviews(config, function (reviewsFromDB) {
 					console.timeEnd('Fetched all reviews from db');
 					const countries = reviewHelper.appCountries(reviewsFromDB);
+					const languages = reviewHelper.appLanguages(reviewsFromDB);
 					const androidVersions = reviewHelper.appVersions(reviewsFromDB, 'android');
 					const iosVersions = reviewHelper.appVersions(reviewsFromDB, 'ios');
 					const cleanReviews = reviewHelper.mergeReviewsFromArrays(reviewsFromDB, reviews);
@@ -116,16 +119,25 @@ function start(completion) {
 					reviewTranslator.translateAllReviews(cleanReviews.newReviews, (translatedNewReviews) => {
 						translatedNewReviews = translatedNewReviews ? translatedNewReviews : [];
 						cleanReviews.reviewsToInsert = mergeNewReviewsAndReviewToInsert(translatedNewReviews, cleanReviews.reviewsToInsert);
+						cleanReviews.reviewsToUpdate = mergeNewReviewsAndReviewToInsert(translatedNewReviews, cleanReviews.reviewsToUpdate);
 						cleanReviews.newReviews = translatedNewReviews;
 						addReviewsToDB(config, cleanReviews, () => {
 							ratingJSON.androidVersions = androidVersions;
 							ratingJSON.iosVersions = iosVersions;
 							ratingJSON.countries = countries;
+							ratingJSON.languages = languages;
 							addRatingsToDB(config, ratingJSON, () => {
 								const slackHelper = new SlackHelper(config.slackConfig, configs.isLocalHost());
 								slackHelper.shareOnSlack(translatedNewReviews, () => {
-									console.timeEnd('Finished ' + config.appName);
-									callback();
+									if (translatedNewReviews.length > 0) {
+										notifyWebsite.notify(config.appName, () => {
+											console.timeEnd('Finished ' + config.appName);
+											callback();
+										});
+									} else {
+										console.timeEnd('Finished ' + config.appName);
+										callback();
+									}
 								});
 							});
 						});

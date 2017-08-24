@@ -8,11 +8,13 @@ module.exports = class ReviewTranslator {
 
 	translateReview(reviewTitle, reviewText, from, completion) {
 		if (from === 'en') {
-			completion(undefined, undefined);
+			completion(from, reviewTitle, reviewText);
 			return;
 		}
 		const splitChar = '1958745213654789';
-		const stringToTranslate = reviewTitle + splitChar + reviewText;
+		const hasTitle = reviewTitle ? true : false;
+		const stringToTranslate = hasTitle ? reviewTitle + splitChar + reviewText : reviewText;
+
 		const options = {
 			to: 'en'
 		};
@@ -22,9 +24,13 @@ module.exports = class ReviewTranslator {
 				completion(from ? from : res.from.language.iso, reviewTitle, reviewText);
 				return;
 			}
-			const results = res.text.split(splitChar);
-			const translatedTitle = results[0];
-			const translatedText = results[1];
+			var translatedTitle = '';
+			var translatedText = res.text;
+			if (hasTitle) {
+				const results = res.text.split(splitChar);
+				translatedTitle = results[0];
+				translatedText = results[1];
+			}
 			completion(from ? from : res.from.language.iso, translatedTitle, translatedText);
 		}).catch(err => {
 			console.error(err);
@@ -34,7 +40,7 @@ module.exports = class ReviewTranslator {
 
 	translateAllReviews(reviews, completion) {
 		const filteredReviews = reviews.filter((review) => {
-			return review.reviewInfo.text && (review.deviceInfo.languageCode !== 'en') && (!review.reviewInfo.translatedText);
+			return review.reviewInfo.text && (!review.reviewInfo.translatedText);
 		});
 
 		if (filteredReviews.length === 0) {

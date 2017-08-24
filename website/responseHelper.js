@@ -8,14 +8,15 @@ herokuDetails.fetchHerokuDetails(function (herokuDetails) {
 
 module.exports = {
 	getDefaultParams: function (config, reviewDB, callback) {
-		reviewDB.getRating(config, function (ratingJSON) {
+		reviewDB.getRatings(config, function (ratingJSON) {
 			callback(ratingJSON, {
 				appName: config.appName,
 				companyName: config.companyName,
 				footer: footer,
 				iosVersions: ratingJSON.iosVersions,
 				androidVersions: ratingJSON.androidVersions,
-				countries: ratingJSON.countries
+				countries: ratingJSON.countries,
+				languages: ratingJSON.languages
 			});
 		});
 	},

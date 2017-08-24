@@ -52,37 +52,60 @@
       <% } %>
     </ul>
     <div style="clear:both;"></div>
-
+    <% var counter = 0;%>
     <% reviews.forEach(function(review){ %>
-      <% const platformIcon =  review.deviceInfo.platform == 'Android'? 'fa-android' : 'fa-apple'%>
-      <h5><%- review.getRatingText(); %> on <%- review.getFormattedReviewDate(); %></h5>
-      <p>
-          <% const title = review.reviewInfo.title?"<em>\"" + review.reviewInfo.title + "\"</em> - " : "" %>
-          <%- title %><%- review.reviewInfo.author %><br>
-          <%- review.reviewInfo.text %><br>
-          <small><i class="fa <%- platformIcon %>" aria-hidden="true"></i> </small>
-          <% if (review.appInfo.version && review.appInfo.versionCode) { %>
-            <small>v<%- review.appInfo.version %> , <%- review.appInfo.versionCode %>, <%- review.getLocationText(); %></small><br>
-            <% if (review.deviceInfo.device) { %>
-              <span data-toggle="tooltip" data-placement="bottom" title="<%= review.getHumanFriendlyDeviceMetaData() %>">
-              <small><%- review.getDeviceInfo(); %></small>
-            <% } %>
-          </span>
-          <% } else if (review.appInfo.version) { %>
-            <small>v<%- review.appInfo.version %> , <%- review.getLocationText(); %></small>
-          <% } else { %>
-            <small><%- review.getLocationText(); %></small>
-          <% } %>
-          <% if (review.reviewInfo.developerCommentDateTime) { %>
-            <blockquote><em>
-            <%= companyName %> responded on <%- review.getFormattedDeveloperReviewDate() %>
-            <br>
-            <%- review.reviewInfo.developerComment %>
-          </em></blockquote>
-          <% } %>
-      </p>
+      <% counter++;%>
+      <%- review.getHTML() %>
+      <% const encodedId = counter; %>
+      <% if(!review.isEnglish()){ %>
+        <button type="button" class="btn btn-custom" data-toggle="modal" data-target="#t<%= encodedId %>">translate</button>
+        <div class="modal fade" id="t<%= encodedId %>" role="dialog">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4 class="modal-title">Translation</h4>
+                <button type="button" class="close" onClick="$('#t<%= encodedId %>').modal('toggle')">&times;</button>
+              </div>
+              <div class="modal-body">
+                <p><%- review.getHTML(true) %></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% } %>
+      <% if(review.getOldReview()){ %>
+        <button type="button" class="btn btn-custom" data-toggle="modal" data-target="#h<%= encodedId %>">history</button>
+        <div class="modal fade" id="h<%= encodedId %>" role="dialog">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4 class="modal-title">History</h4>
+                <button type="button" class="close" onClick="$('#h<%= encodedId %>').modal('toggle')">&times;</button>
+              </div>
+              <div class="modal-body">
+                <p><%- review.getHistory() %></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% } %>
     <% }); %>
   </div>
+  <script>
+  function start(){
+     var host = location.origin.replace(/^http/, 'ws')
+     var ws = new WebSocket(host);
+     ws.onmessage = function (event) {
+       if(window.location.pathname.split('/')[1].toLowerCase() === event.data.toLowerCase()){
+         location.reload();
+       }
+     };
+     ws.onclose = function(){
+      setTimeout(start, 60000);
+    };
+  };
+  start();
+  </script>
   <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>

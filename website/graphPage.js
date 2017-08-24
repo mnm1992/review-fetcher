@@ -1,6 +1,7 @@
 const dateLib = require('date-and-time');
 const responseHelper = require('./responseHelper');
-const configs = require('../common/configs');
+const Configs = require('../common/configs');
+const configs = new Configs();
 const ReviewJSONDB = require('../common/reviewJSONDB');
 const reviewDB = new ReviewJSONDB();
 
@@ -8,7 +9,7 @@ module.exports = {
 	render: function (request, response) {
 		const config = configs.configForApp(request.params.app.toLowerCase());
 		if (config === null) {
-			responseHelper.notFound(response, 'proposition not found');
+			responseHelper.notFound(response, 'Graph page: proposition not found');
 			return;
 		}
 		responseHelper.getDefaultParams(config, reviewDB, function (ratingJSON, defaultParams) {

@@ -2,9 +2,10 @@ module.exports = {
 	averageFromHistogram: function (histogram) {
 		const amountOfReviews = histogram['1'] + histogram['2'] + histogram['3'] + histogram['4'] + histogram['5'];
 		const totalReviewScore = (1 * histogram['1']) + (2 * histogram['2']) + (3 * histogram['3']) + (4 * histogram['4']) + (5 * histogram['5']);
+		const saveDivider = amountOfReviews === 0 ? 1 : amountOfReviews;
 		return {
 			amount: amountOfReviews,
-			average: (totalReviewScore / amountOfReviews)
+			average: (totalReviewScore / saveDivider)
 		};
 	},
 
@@ -20,9 +21,10 @@ module.exports = {
 				reviewCount += 1;
 			}
 		}
+		const saveDivider = reviewCount === 0 ? 1 : reviewCount;
 		return {
 			amount: reviewCount,
-			average: (totalScore / reviewCount)
+			average: (totalScore / saveDivider)
 		};
 	},
 
