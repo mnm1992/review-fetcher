@@ -6,7 +6,7 @@ function getColor(value){
 }
 %>
 <div class="card">
-  <div class="card-block">
+  <div class="card-body">
     <h4 class="card-title">Countries Android%></h4>
     <table>
       <tr>
@@ -15,7 +15,6 @@ function getColor(value){
         <th>Average</th>
         <th>#Reviews</th>
       </tr>
-      <% androidCountryStats.sort(function(x, y){ if (x.country < y.country) { return -1; } if (x.country > y.country) { return 1; } return 0; }); %>
         <% androidCountryStats.forEach(function(countryData) { %>
           <tr>
             <td>

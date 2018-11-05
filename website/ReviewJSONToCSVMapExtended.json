@@ -1,0 +1,152 @@
+[
+  {
+    "label": "Id",
+    "value": "reviewInfo.id",
+    "default": ""
+  },
+  {
+    "label": "Date",
+    "value": "reviewInfo.dateTime",
+    "default": ""
+  },
+  {
+    "label": "Author",
+    "value": "reviewInfo.author",
+    "default": ""
+  },
+  {
+    "label": "Title",
+    "value": "reviewInfo.title",
+    "default": ""
+  },
+  {
+    "label": "Text",
+    "value": "reviewInfo.text",
+    "default": ""
+  },
+  {
+    "label": "Rating",
+    "value": "reviewInfo.rating",
+    "default": ""
+  },
+  {
+    "label": "Rating",
+    "value": "reviewInfo.rating",
+    "default": ""
+  },
+  {
+    "label": "Developer comment date",
+    "value": "reviewInfo.developerCommentDateTime",
+    "default": ""
+  },
+  {
+    "label": "Developer comment",
+    "value": "reviewInfo.developerComment",
+    "default": ""
+  },
+  {
+    "label": "App id",
+    "value": "appInfo.id",
+    "default": ""
+  },
+  {
+    "label": "App version",
+    "value": "appInfo.version",
+    "default": ""
+  },
+  {
+    "label": "App version code",
+    "value": "appInfo.versionCode",
+    "default": ""
+  },
+  {
+    "label": "Device iso code",
+    "value": "deviceInfo.isoCode",
+    "default": ""
+  },
+  {
+    "label": "Device country",
+    "value": "deviceInfo.country",
+    "default": ""
+  },
+  {
+    "label": "Device language",
+    "value": "deviceInfo.language",
+    "default": ""
+  },
+  {
+    "label": "Device platform",
+    "value": "deviceInfo.platform",
+    "default": ""
+  },
+  {
+    "label": "Device os version",
+    "value": "deviceInfo.osVersion",
+    "default": ""
+  },
+  {
+    "label": "Device name",
+    "value": "deviceInfo.device",
+    "default": ""
+  },
+  {
+    "label": "Device name",
+    "value": "deviceInfo.device",
+    "default": ""
+  },
+  {
+    "label": "Device product name",
+    "value": "deviceInfo.deviceMetadata.productName",
+    "default": ""
+  },
+  {
+    "label": "Device manufactorer",
+    "value": "deviceInfo.deviceMetadata.manufacturer",
+    "default": ""
+  },
+  {
+    "label": "Device class",
+    "value": "deviceInfo.deviceMetadata.deviceClass",
+    "default": ""
+  },
+  {
+    "label": "Device screen widthin px",
+    "value": "deviceInfo.deviceMetadata.screenWidthPx",
+    "default": ""
+  },
+  {
+    "label": "Device screen height in px",
+    "value": "deviceInfo.deviceMetadata.screenHeightPx",
+    "default": ""
+  },
+  {
+    "label": "Device native platform",
+    "value": "deviceInfo.deviceMetadata.nativePlatform",
+    "default": ""
+  },
+  {
+    "label": "Device screen density dpi",
+    "value": "deviceInfo.deviceMetadata.screenDensityDpi",
+    "default": ""
+  },
+  {
+    "label": "Device glEsVersion",
+    "value": "deviceInfo.deviceMetadata.glEsVersion",
+    "default": ""
+  },
+  {
+    "label": "Device cpu model",
+    "value": "deviceInfo.deviceMetadata.cpuModel",
+    "default": ""
+  },
+  {
+    "label": "Device cpu make",
+    "value": "deviceInfo.deviceMetadata.cpuMake",
+    "default": ""
+  },
+  {
+    "label": "Device ram in mb",
+    "value": "deviceInfo.deviceMetadata.ramMb",
+    "default": ""
+  }
+]

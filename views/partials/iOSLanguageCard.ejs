@@ -6,7 +6,7 @@ function getColor(value){
 }
 %>
 <div class="card">
-  <div class="card-block">
+  <div class="card-body">
     <h4 class="card-title">Languages iOS</h4>
     <table>
       <tr>
@@ -14,7 +14,6 @@ function getColor(value){
         <th>Average</th>
         <th>#Reviews</th>
       </tr>
-      <% iOSLanguageStats.sort(function(x, y){ if (x.language < y.language) { return -1; } if (x.language > y.language) { return 1; } return 0; }); %>
         <% iOSLanguageStats.forEach(function(languageData) { %>
           <tr>
             <td>

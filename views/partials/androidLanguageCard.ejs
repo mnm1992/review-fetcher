@@ -5,8 +5,8 @@ function getColor(value){
     return ["hsl(",hue,",100%,75%)"].join("");
 }
 %>
-<div class="card">
-  <div class="card-block">
+<div class="card" >
+  <div class="card-body">
     <h4 class="card-title">Languages Android</h4>
     <table>
       <tr>
@@ -14,7 +14,6 @@ function getColor(value){
         <th>Average</th>
         <th>#Reviews</th>
       </tr>
-      <% androidLanguageStats.sort(function(x, y){ if (x.language < y.language) { return -1; } if (x.language > y.language) { return 1; } return 0; }); %>
         <% androidLanguageStats.forEach(function(languageData) { %>
           <tr>
             <td>

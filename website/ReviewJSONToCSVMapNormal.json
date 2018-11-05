@@ -1,0 +1,57 @@
+[
+  {
+    "label": "Id",
+    "value": "reviewInfo.id",
+    "default": ""
+  },
+  {
+    "label": "Date",
+    "value": "reviewInfo.dateTime",
+    "default": ""
+  },
+  {
+    "label": "Author",
+    "value": "reviewInfo.author",
+    "default": ""
+  },
+  {
+    "label": "Title",
+    "value": "reviewInfo.title",
+    "default": ""
+  },
+  {
+    "label": "Text",
+    "value": "reviewInfo.text",
+    "default": ""
+  },
+  {
+    "label": "Rating",
+    "value": "reviewInfo.rating",
+    "default": ""
+  },
+  {
+    "label": "App id",
+    "value": "appInfo.id",
+    "default": ""
+  },
+  {
+    "label": "App version",
+    "value": "appInfo.version",
+    "default": ""
+  },
+  {
+    "label": "Device country",
+    "value": "deviceInfo.country",
+    "default": ""
+  },
+  {
+    "label": "Device language",
+    "value": "deviceInfo.language",
+    "default": ""
+  },
+  {
+    "label": "Device platform",
+    "value": "deviceInfo.platform",
+    "default": ""
+  }
+]

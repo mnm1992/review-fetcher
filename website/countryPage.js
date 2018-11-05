@@ -1,67 +1,68 @@
-const histogramCalculator = require('../common/histogramCalculator');
-const responseHelper = require('./responseHelper');
-const Configs = require('../common/configs');
-const configs = new Configs();
-const ReviewJSONDB = require('../common/reviewJSONDB');
-const reviewDB = new ReviewJSONDB();
+const HistogramCalculator = require('../common/HistogramCalculator');
 
-module.exports = {
-	render: function (request, response) {
-		const config = configs.configForApp(request.params.app.toLowerCase());
-		if (config === null) {
-			responseHelper.notFound(response, 'COuntry page: proposition not found');
-			return;
-		}
-		const option = request.params.countryCode.toLowerCase();
-		responseHelper.getDefaultParams(config, reviewDB, (ratingJSON, defaultParams) => {
-			defaultParams.translate = request.query.translate;
-			constructCountryPage(config, option, defaultParams, ratingJSON, response);
-		});
-	},
+module.exports = class CountryPage {
+    constructor(configs, dbHelper, responseHelper) {
+        this.configs = configs;
+        this.dbHelper = dbHelper;
+        this.responseHelper = responseHelper;
+    }
+
+    async render(request, response) {
+        const config = this.configs.configForApp(request.params.app.toLowerCase());
+        if (config === null) {
+            this.responseHelper.notFound(response, 'Country page: proposition not found');
+            return;
+        }
+        const option = request.params.countryCode.toLowerCase();
+        const result = await this.responseHelper.getDefaultParams(config, this.dbHelper);
+        result.translate = request.query.translate;
+        return this.constructCountryPage(config, option, result.defaultParams, result.metadata, response);
+    }
+
+    async constructCountryPage(config, country, defaultParams, metadata, response) {
+        console.time('Preparing the country page for ' + country);
+        const reviews = await this.dbHelper.getReviewsForCountry(config.androidConfig.id, config.iOSConfig.id, country);
+        const countryName = this.findCountryName(metadata.countries, country);
+
+        const histogramCalculator = new HistogramCalculator();
+        const reviewHistogram = histogramCalculator.calculateHistogram(reviews);
+        let ratingHistogram = histogramCalculator.calculateHistogram(reviews, 'android');
+        ratingHistogram = histogramCalculator.mergeHistograms(ratingHistogram, this.findIOSHistogramForCountry(country, metadata));
+        const ratingDetails = histogramCalculator.averageFromHistogram(ratingHistogram);
+        const ratingAverage = ratingDetails.average;
+        const ratingTotal = ratingDetails.amount;
+        const reviewsDetails = histogramCalculator.averageFromHistogram(reviewHistogram);
+        const reviewAverage = reviewsDetails.average;
+        const reviewTotal = reviewsDetails.amount;
+        const appName = metadata.name ? metadata.name : config.appName;
+        const countryProperties = {
+            tabTitle: config.appName + ' ' + country + ' Reviews',
+            pageTitle: appName + ' ' + countryName,
+            hint: 'Android ratings not available',
+            page: 'Countries',
+            totalRatings: ratingTotal,
+            averageRatings: ratingAverage,
+            totalReviews: reviewTotal,
+            averageReviews: reviewAverage,
+            ratingHistogram: ratingHistogram,
+            reviewHistogram: reviewHistogram,
+            reviews: reviews
+        };
+        response.render('reviews', Object.assign(countryProperties, defaultParams));
+        console.timeEnd('Preparing the country page for ' + country);
+    }
+
+    findIOSHistogramForCountry(country, ratingJSON) {
+        return ratingJSON.histogramPerCountry[country].histogram;
+    }
+
+    findCountryName(countries, code) {
+        for (const countryDict of countries) {
+            const currentCode = Object.keys(countryDict)[0];
+            if (currentCode === code) {
+                return countryDict[code];
+            }
+        }
+        return code;
+    }
 };
-
-function constructCountryPage(config, country, defaultParams, ratingJSON, response) {
-	console.time('Preparing the country page for ' + country);
-	reviewDB.getReviewsForCountry(config, country, function (reviews) {
-		const countryName = findCountryName(ratingJSON.countries, country);
-		const reviewHistogram = histogramCalculator.calculateHistogram(reviews);
-		var ratingHistogram = histogramCalculator.calculateHistogram(reviews, 'android');
-		ratingHistogram = histogramCalculator.mergeHistograms(ratingHistogram, findIOSHitogramForCountry(country, ratingJSON));
-		const ratingDetails = histogramCalculator.averageFromHistogram(ratingHistogram);
-		const ratingAverage = ratingDetails.average;
-		const ratingTotal = ratingDetails.amount;
-		const reviewsDetails = histogramCalculator.averageFromHistogram(reviewHistogram);
-		const reviewAverage = reviewsDetails.average;
-		const reviewTotal = reviewsDetails.amount;
-		const countryProperties = {
-			tabTitle: config.appName + ' ' + country + ' Reviews',
-			pageTitle: config.appName + ' ' + countryName,
-			hint: 'Android ratings not available',
-			page: 'Countries',
-			totalRatings: ratingTotal,
-			averageRatings: ratingAverage,
-			totalReviews: reviewTotal,
-			averageReviews: reviewAverage,
-			ratingHistogram: ratingHistogram,
-			reviewHistogram: reviewHistogram,
-			reviews: reviews
-		};
-		response.render('reviews', Object.assign(countryProperties, defaultParams));
-		console.timeEnd('Preparing the country page for ' + country);
-	});
-}
-
-function findIOSHitogramForCountry(country, ratingJSON) {
-	return ratingJSON.histogramPerCountry[country];
-}
-
-function findCountryName(countries, code) {
-	for (var i = 0; i < countries.length; i++) {
-		const countryDict = countries[i];
-		const currentCode = Object.keys(countryDict)[0];
-		if (currentCode === code) {
-			return countryDict[code];
-		}
-	}
-	return code;
-}

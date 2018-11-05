@@ -1,99 +1,92 @@
-const responseHelper = require('./responseHelper');
-const Configs = require('../common/configs');
-const configs = new Configs();
-const ReviewJSONDB = require('../common/reviewJSONDB');
-const reviewDB = new ReviewJSONDB();
-const json2csv = require('json2csv');
+const Json2csvParser = require('json2csv').Parser;
 const xml2js = require('xml2js');
+
 const builder = new xml2js.Builder({
-	rootName: 'reviews',
-	explicitRoot: false,
-	allowSurrogateChars: true
+    rootName: 'reviews',
+    explicitRoot: false,
+    allowSurrogateChars: true
 });
 
-module.exports = {
+module.exports = class ExportPage {
+    constructor(configs, dbHelper, responseHelper) {
+        this.configs = configs;
+        this.dbHelper = dbHelper;
+        this.responseHelper = responseHelper;
+    }
 
-	exportJSON: function (request, response) {
-		const config = configs.configForApp(request.params.app.toLowerCase());
-		if (config === null) {
-			responseHelper.notFound(response, 'Export JSON: proposition not found');
-			return;
-		}
-		constructJSONDump(config, response);
-	},
+    async exportJSON(request, response) {
+        const config = this.configs.configForApp(request.params.app.toLowerCase());
+        if (config === null) {
+            this.responseHelper.notFound(response, 'Export JSON: proposition not found');
+            return;
+        }
+        return this.constructJSONDump(config, response);
+    }
 
-	exportXML: function (request, response) {
-		const config = configs.configForApp(request.params.app.toLowerCase());
-		if (config === null) {
-			responseHelper.notFound(response, 'Export xml: proposition not found');
-			return;
-		}
-		constructXMLDump(config, response);
-	},
+    async exportXML(request, response) {
+        const config = this.configs.configForApp(request.params.app.toLowerCase());
+        if (config === null) {
+            this.responseHelper.notFound(response, 'Export xml: proposition not found');
+            return;
+        }
+        return this.constructXMLDump(config, response);
+    }
 
-	exportCSV: function (request, response) {
-		const config = configs.configForApp(request.params.app.toLowerCase());
-		if (config === null) {
-			responseHelper.notFound(response, 'Export CSV: proposition not found');
-			return;
-		}
-		constructCSVDump(config, response);
-	},
+    async exportCSV(request, response) {
+        const config = this.configs.configForApp(request.params.app.toLowerCase());
+        if (config === null) {
+            this.responseHelper.notFound(response, 'Export CSV: proposition not found');
+            return;
+        }
+        return this.constructCSVDump(config, response).then(() => { });
+    }
+
+    async constructJSONDump(config, response) {
+        console.time('Exporting JSON');
+        const reviewArray = [];
+        const reviews = await this.dbHelper.getAllReviews(config.androidConfig.id, config.iOSConfig.id);
+        for (const review of reviews) {
+            reviewArray.push(review.getJSON());
+        }
+        const data = JSON.stringify(reviewArray);
+        const fileName = config.appName + '_reviews.json';
+        this.responseHelper.sendFile(data, fileName, 'application/json', response);
+        console.timeEnd('Exporting JSON');
+    }
+
+    async constructXMLDump(config, response) {
+        console.time('Exporting XML');
+        const reviewArray = [];
+        const reviews = await this.dbHelper.getAllReviews(config.androidConfig.id, config.iOSConfig.id);
+        for (const review of reviews) {
+            reviewArray.push(review.getJSON());
+        }
+        const data = builder.buildObject(JSON.parse(JSON.stringify({
+            "review": reviewArray
+        })));
+        const fileName = config.appName + '_reviews.xml';
+        this.responseHelper.sendFile(data, fileName, 'text/xml', response);
+        console.timeEnd('Exporting XML');
+    }
+
+    async constructCSVDump(config, response) {
+        console.time('Exporting csv');
+        const reviewArray = [];
+        let fields = [];
+        const fieldNames = [];
+        if (config.androidConfig.authentication) {
+            fields = require('./ReviewJSONToCSVMapExtended.json');
+        } else {
+            fields = require('./ReviewJSONToCSVMapNormal.json');
+        }
+        const reviews = await this.dbHelper.getAllReviews(config.androidConfig.id, config.iOSConfig.id);
+        for (const review of reviews) {
+            reviewArray.push(review.getJSON());
+        }
+        const json2csvParser = new Json2csvParser({ fields });
+        const data = json2csvParser.parse(reviewArray);
+        const fileName = config.appName + '_reviews.csv';
+        this.responseHelper.sendFile(data, fileName, 'text/csv', response);
+        console.timeEnd('Exporting csv');
+    }
 };
-
-function constructJSONDump(config, response) {
-	console.time('Exporting JSON');
-	const reviewArray = [];
-	reviewDB.getAllReviews(config, function (reviews) {
-		reviews.forEach(function (review) {
-			reviewArray.push(review.getJSON());
-		});
-		const data = JSON.stringify(reviewArray);
-		const fileName = config.appName + '_reviews.json';
-		responseHelper.sendFile(data, fileName, 'application/json', response);
-		console.timeEnd('Exporting JSON');
-	});
-}
-
-function constructXMLDump(config, response) {
-	console.time('Exporting XML');
-	const reviewArray = [];
-	reviewDB.getAllReviews(config, function (reviews) {
-		reviews.forEach(function (review) {
-			reviewArray.push(review.getJSON());
-		});
-		const data = builder.buildObject(JSON.parse(JSON.stringify({
-			"review": reviewArray
-		})));
-		const fileName = config.appName + '_reviews.xml';
-		responseHelper.sendFile(data, fileName, 'text/xml', response);
-		console.timeEnd('Exporting XML');
-	});
-}
-
-function constructCSVDump(config, response) {
-	console.time('Exporting csv');
-	const reviewArray = [];
-	var fields = [];
-	var fieldNames = [];
-	if (config.androidConfig.authentication) {
-		fields = ['reviewInfo.id', 'reviewInfo.dateTime', 'reviewInfo.author', 'reviewInfo.title', 'reviewInfo.text', 'reviewInfo.rating', 'reviewInfo.developerCommentDateTime', 'reviewInfo.developerComment', 'appInfo.id', 'appInfo.version', 'appInfo.versionCode', 'deviceInfo.isoCode', 'deviceInfo.country', 'deviceInfo.language', 'deviceInfo.platform', 'deviceInfo.osVersion', 'deviceInfo.device', 'deviceInfo.deviceMetadata.productName', 'deviceInfo.deviceMetadata.manufacturer', 'deviceInfo.deviceMetadata.deviceClass', 'deviceInfo.deviceMetadata.screenWidthPx', 'deviceInfo.deviceMetadata.screenHeightPx', 'deviceInfo.deviceMetadata.nativePlatform', 'deviceInfo.deviceMetadata.screenDensityDpi', 'deviceInfo.deviceMetadata.glEsVersion', 'deviceInfo.deviceMetadata.cpuModel', 'deviceInfo.deviceMetadata.cpuMake', 'deviceInfo.deviceMetadata.ramMb'];
-		fieldNames = ['Id', 'Date', 'Author', 'Title', 'Text', 'Rating', 'Developer comment date', 'Developer comment', 'App id', 'App version', 'App version code', 'Device iso code', 'Device country', 'Device language', 'Device platform', 'Device os version', 'Device name', 'Device product name', 'Device manufactorer', 'Device class', 'Device screen widthin px', 'Device screen height in px', 'Device native platform', 'Device screen density dpi', 'Device glEsVersion', 'Device cpu model', 'Device cpu make', 'device ram in mb'];
-	} else {
-		fields = ['reviewInfo.id', 'reviewInfo.dateTime', 'reviewInfo.author', 'reviewInfo.title', 'reviewInfo.text', 'reviewInfo.rating', 'appInfo.id', 'appInfo.version', 'deviceInfo.country', 'deviceInfo.language', 'deviceInfo.platform'];
-		fieldNames = ['Id', 'Date', 'Author', 'Title', 'Text', 'Rating', 'App id', 'App version', 'Device country', 'Device language', 'Device platform'];
-	}
-	reviewDB.getAllReviews(config, function (reviews) {
-		reviews.forEach(function (review) {
-			reviewArray.push(review.getJSON());
-		});
-		const data = json2csv({
-			data: reviewArray,
-			fields: fields,
-			fieldNames: fieldNames
-		});
-		const fileName = config.appName + '_reviews.csv';
-		responseHelper.sendFile(data, fileName, 'text/csv', response);
-		console.timeEnd('Exporting csv');
-	});
-}
