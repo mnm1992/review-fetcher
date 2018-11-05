@@ -1,0 +1,101 @@
+{
+	"info": {
+		"_postman_id": "646d10fe-41ba-4c10-a1bf-e29c5e808076",
+		"name": "Appstores",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "ios ratings",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "User-Agent",
+						"value": "iTunes/9.2.1 (Macintosh; Intel Mac OS X 10.5.8) AppleWebKit/533.16",
+						"type": "text"
+					},
+					{
+						"key": "X-Apple-Store-Front",
+						"value": "143452,12",
+						"type": "text"
+					},
+					{
+						"key": "Accept-Language",
+						"value": "en-us, en;q=0.50",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://itunes.apple.com/WebObjects/MZStore.woa/wa/customerReviews?s=143452&id=1063224663&displayable-kind=11#8217",
+					"protocol": "http",
+					"host": [
+						"itunes",
+						"apple",
+						"com"
+					],
+					"path": [
+						"WebObjects",
+						"MZStore.woa",
+						"wa",
+						"customerReviews"
+					],
+					"query": [
+						{
+							"key": "s",
+							"value": "143452"
+						},
+						{
+							"key": "id",
+							"value": "1063224663"
+						},
+						{
+							"key": "displayable-kind",
+							"value": "11"
+						},
+						{
+							"key": null,
+							"value": null
+						}
+					],
+					"hash": "8217"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ios reviews",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://itunes.apple.com/nl/rss/customerreviews/page=1/id=1063224663/sortby=mostrecent/xml",
+					"protocol": "https",
+					"host": [
+						"itunes",
+						"apple",
+						"com"
+					],
+					"path": [
+						"nl",
+						"rss",
+						"customerreviews",
+						"page=1",
+						"id=1063224663",
+						"sortby=mostrecent",
+						"xml"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
