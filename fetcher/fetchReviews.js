@@ -82,11 +82,11 @@ async function startFetching() {
     const dbHelper = new ReviewDBHelper();
     const configs = new Configs();
     const fetchedReviews = await checkAndStoreNewReviews(configs, dbHelper);
+    const slackHelper = new SlackHelper();
     for (const app of configs.allConfigs()) {
         const reviews = fetchedReviews.reviews[app.appName];
         if (reviews.length > 0) {
-            //const slackHelper = new SlackHelper();
-            //await slackHelper.shareOnSlack(app.slackConfig, reviews, configs.isLocalHost());
+            await slackHelper.shareOnSlack(app.slackConfig, reviews, configs.isLocalHost());
             await notify(configs.port(), app.appName);
         }
     }
