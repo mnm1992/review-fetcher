@@ -1,4 +1,4 @@
-const dateLib = require('date-and-time');
+const moment = require('moment');
 
 Date.prototype.addDays = function (days) {
     const dat = new Date(this.valueOf());
@@ -77,8 +77,8 @@ module.exports = class GraphPage {
     }
 
     formatDate(date) {
-        dateLib.locale('nl');
-        return dateLib.format(new Date(date), 'DD MMM YYYY');
+        moment.locale('nl');
+        return moment(date).format('DD MMM YYYY');
     }
 
     getDates(startDate, stopDate) {

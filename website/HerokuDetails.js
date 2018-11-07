@@ -1,4 +1,4 @@
-const dateLib = require('date-and-time');
+const moment = require('moment');
 const Request = require('request-promise');
 const Configs = require('../common/Configs');
 
@@ -21,7 +21,7 @@ module.exports = class HerokuDetails {
         }
         const result = await Request(options);
         const info = JSON.parse(result)[0];
-        const date = dateLib.format(new Date(info.created_at), 'DD MMM YYYY HH:mm:ss', true);
+        const date = moment(info.created_at).format('DD MMM YYYY HH:mm:ss');
         const commit = info.description.split(' ')[1];
         const footer = 'Review fetcher v' + info.version + '(' + commit + ') ' + date;
         return footer;

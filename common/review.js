@@ -1,5 +1,4 @@
-const hash = require('object-hash');
-const dateLib = require('date-and-time');
+const moment = require('moment');
 const androidDevices = require('android-device-list');
 const androidVersions = require('android-versions');
 
@@ -74,12 +73,12 @@ module.exports = class Review {
     }
 
     getFormattedDate(date, hastime) {
-        dateLib.locale('en');
+        moment.locale('en');
         if (date) {
             if (hastime) {
-                return dateLib.format(date, 'DD MMM YYYY HH:mm:ss');
+                return moment(date).format('DD MMM YYYY HH:mm:ss');
             }
-            return dateLib.format(date, 'DD MMM YYYY');
+            return moment(date).format('DD MMM YYYY');
         }
         return '';
     }

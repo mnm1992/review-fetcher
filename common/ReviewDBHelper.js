@@ -11,24 +11,26 @@ const Column = pgp.helpers.Column;
 const reviewidColumn = new Column('?id');
 const appidColumn = new Column('?appid');
 const postedDateColumn = new Column('?posteddate');
+const objectVersionColumn = new Column('?objectversion');
 const reviewColumn = new Column({
     name: 'review',
     cast: 'json'
 });
-const cs = new pgp.helpers.ColumnSet([reviewidColumn, appidColumn, postedDateColumn, reviewColumn], {
+const cs = new pgp.helpers.ColumnSet([reviewidColumn, appidColumn, postedDateColumn, reviewColumn, objectVersionColumn], {
     table: 'reviews'
 });
+const currentObjectVersion = 2;
 
 module.exports = class ReviewJSONDB {
 
     async setUpDB() {
         const reviewsTableResult = await db.any('SELECT to_regclass(\'reviews\')');
         if (!reviewsTableResult[0].to_regclass) {
-            await db.none('CREATE TABLE reviews(id TEXT PRIMARY KEY NOT NULL, appid TEXT NOT NULL, posteddate date, review JSON NOT NULL)');
+            await db.none('CREATE TABLE reviews(id TEXT PRIMARY KEY NOT NULL, appid TEXT NOT NULL, posteddate date, review JSON NOT NULL, objectversion INTEGER NOT NULL)');
         }
         const metadataTableResult = await db.any('SELECT to_regclass(\'metadata\')');
         if (!metadataTableResult[0].to_regclass) {
-            await db.none('CREATE TABLE metadata(id TEXT PRIMARY KEY NOT NULL, metadata JSON NOT NULL)');
+            await db.none('CREATE TABLE metadata(id TEXT PRIMARY KEY NOT NULL, metadata JSON NOT NULL, objectversion INTEGER NOT NULL)');
         }
         const reviewJSONTableResult = await db.any('SELECT to_regclass(\'reviewjson\')');
         if (reviewJSONTableResult[0].to_regclass) {
@@ -68,8 +70,8 @@ module.exports = class ReviewJSONDB {
     }
 
     async upsertAverageRating(app, ratingJSON) {
-        const query = 'INSERT INTO metadata (id, metadata) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET metadata=EXCLUDED.metadata';
-        const values = [app, ratingJSON];
+        const query = 'INSERT INTO metadata (id, metadata, objectversion) VALUES ($1, $2, $3) ON CONFLICT (id) DO UPDATE SET metadata=EXCLUDED.metadata, objectversion=EXCLUDED.objectversion';
+        const values = [app, ratingJSON, currentObjectVersion];
         return db.none(query, values);
     }
 
@@ -118,7 +120,8 @@ module.exports = class ReviewJSONDB {
                 id: review.reviewInfo.id,
                 appid: review.appInfo.id,
                 posteddate: review.reviewInfo.dateTime ? review.reviewInfo.dateTime : null,
-                review: review.getJSON()
+                review: review.getJSON(),
+                objectversion: currentObjectVersion
             });
         }
         return values;

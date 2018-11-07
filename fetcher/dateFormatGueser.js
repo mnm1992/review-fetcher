@@ -1,7 +1,8 @@
 /*jslint es6:true*/
 
-const dateLib = require('date-and-time');
+const moment = require('moment');
 const formatToCodeMap = {
+    'cs': 'D MMMM YYYY',
     'de': 'D MMMM YYYY',
     'el': 'D MMMM YYYY',
     'es': 'D MMMM YYYY',
@@ -17,6 +18,7 @@ const formatToCodeMap = {
     'tr': 'D MMMM YYYY',
     'en': 'MMMM D YYYY',
     'hu': 'YYYY MMMM D',
+    'ru': 'D MMMM YYYY',
     'ja': 'YYYY年M月D日',
     'zh-cn': 'YYYY年M月D日'
 };
@@ -58,8 +60,8 @@ module.exports = class DateFormatGueser {
     parseDate(dateString, languageCode) {
         const dateFormat = formatToCodeMap[languageCode];
         if (dateFormat) {
-            dateLib.locale(languageCode);
-            const date = dateLib.parse(dateString, dateFormat, true);
+            moment.locale(languageCode);
+            const date = moment(dateString, dateFormat);
             if (date) {
                 return date;
             }
@@ -67,9 +69,23 @@ module.exports = class DateFormatGueser {
         return null;
     }
 
+    isNumeric(n) {
+      return !isNaN(parseFloat(n)) && isFinite(n);
+    }
+
     guesDate(dateString, languageCode) {
         const dateStringToParse = dateString.replaceAll('.', '').replaceAll(',', '').replaceAll(' de ', ' ');
         let date = this.parseDate(dateStringToParse, languageCode);
+        if (!date) {
+          let toTry;
+          const index = this.isNumeric(2) == ' ' ? (this.isNumeric(4) == ' ' ? 6 : 4) : 3;
+          if (dateStringToParse.charAt(index) == dateStringToParse.charAt(index).toLowerCase()) {
+            toTry = dateStringToParse.substr(0, index-1) + dateStringToParse.charAt(index).toUpperCase() + dateStringToParse.substr(index+1);
+          } else {
+            toTry = dateStringToParse.substr(0, index-1) + dateStringToParse.charAt(index).toLowerCase() + dateStringToParse.substr(index+1);
+          }
+          date = this.parseDate(toTry, languageCode);
+        }
         if (!date) {
             date = this.bruteForceDate(dateStringToParse);
         }

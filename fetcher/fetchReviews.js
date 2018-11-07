@@ -11,6 +11,7 @@ async function checkAndStoreNewReviews(configs, dbHelper) {
     const reviewFetcher = new ReviewFetcher();
     const reviewHelper = new ReviewHelper();
     for (const app of configs.allConfigs()) {
+        console.log("Started fetching reviews for: " + app.appName);
         console.time("Fetching reviews for: " + app.appName);
         const result = await reviewFetcher.checkForNewReviews(app.appName, app.androidConfig.id, app.androidConfig.authentication, app.androidConfig.languages, app.iOSConfig.id, app.iOSConfig.countries);
         const reviewsFromDb = await dbHelper.getAllReviews(app.androidConfig.id, app.iOSConfig.id);
@@ -39,6 +40,7 @@ async function startScraping() {
     const reviewHelper = new ReviewHelper();
     for (const app of configs.allConfigs()) {
         if (app.androidConfig.authentication) {
+            console.log("Scraping android reviews for: " + app.appName);
             console.time("Scraping android reviews for: " + app.appName);
             const result = await reviewFetcher.fetchAndroidScrapedReviews(app.androidConfig.id, app.androidConfig.languages);
             const reviewsFromDb = await dbHelper.getAllReviews(app.androidConfig.id, app.iOSConfig.id);

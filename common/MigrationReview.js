@@ -1,8 +1,3 @@
-const hash = require('object-hash');
-const dateLib = require('date-and-time');
-const androidDevices = require('android-device-list');
-const androidVersions = require('android-versions');
-
 let largestDepth = 0;
 
 module.exports = class Review {
