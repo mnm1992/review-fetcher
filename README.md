@@ -24,14 +24,14 @@ How to set it up locally?
 Install node and postgres
 
 ### Setting up DB
-Configure postgres with user:postgres password:postgres database postgres (You can change this at: ReviewJSONDB.js line 5 till 9)
-The database is automatically setup when start website/index.js. It will also automatically migrate from older version of review-fetcher.
+Configure postgres with user:postgres password:postgres database:postgres (You can change this at: ReviewJSONDB.js line 5 till 9)
+The database is automatically setup when you run "node website/index.js". It will also automatically migrate from older versions of review-fetcher.
 
 ### Setting up the configuration
 Open configs.js, and follow the instructions in the file.
 
 ### installing the libraries
-run npm install in the commandline
+run npm install in the commandline to install the dependencies
 
 ### Running it
 First run node website/index.js to setup the database.
@@ -43,8 +43,8 @@ How to set it up in heroku?
 =========
 
 ### Prerequisites
-Add heroku postgres and heroku scheduler. This program can in heroku free tier, but you'll need a verified account to install these dependencies.</br>
-Follow the following steps to configure node for heroku on your machine.</br>
+Add heroku postgres and heroku scheduler to the heroku app. This program can run in heroku free tier, but you'll need a verified account to install these dependencies.</br>
+Follow the following steps to configure node for heroku on your heroku instance.</br>
 https://devcenter.heroku.com/articles/getting-started-with-nodejs#set-up
 
 ### Setting up DB
@@ -54,7 +54,7 @@ The database will be setup automatically. Nothing todo manually.
 Open configs.js, and follow the instructions in the file.
 
 ### Running it
-Configure heroku scheduler to run node fetcher/startFetching.js to run every 10 minutes.
+Configure heroku scheduler to run node fetcher/startFetching.js every 10 minutes.
 After that just do a git push to deploy review-fetcher.
 
 Then in your web browser open:</br>
