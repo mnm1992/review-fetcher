@@ -46,10 +46,6 @@ module.exports = class Review {
         return json;
     }
 
-    isEnglish() {
-        return this.deviceInfo.languageCode === 'en';
-    }
-
     getHumanFriendlyDeviceMetaData() {
         if (this.deviceInfo.deviceMetadata) {
             let text = "";
@@ -99,22 +95,32 @@ module.exports = class Review {
     }
 
     getDeviceModelInfo() {
-        const deviceName = androidDevices.getDevicesByDeviceId(this.deviceInfo.device);
-        if (deviceName[0]) {
-            return deviceName[0].brand + ', ' + deviceName[0].name + '(' + this.deviceInfo.device + ')';
+        if(this.deviceInfo.device && !this.deviceInfo.brand) {
+            const deviceName = androidDevices.getDevicesByDeviceId(this.deviceInfo.device);
+            if (deviceName[0]) {
+                this.deviceInfo.brand = deviceName[0].brand;
+                this.deviceInfo.name = deviceName[0].name;
+                this.deviceInfo.model = deviceName[0].model;
+            }
+        }
+
+        if (this.deviceInfo.brand) {
+            return this.deviceInfo.brand + ', ' + this.deviceInfo.name + '(' + this.deviceInfo.device + ')';
         }
         return 'Unknown: ' + this.deviceInfo.device;
     }
 
     getDeviceVersionInfo() {
-        if (this.deviceInfo.osVersion) {
+        if (this.deviceInfo.osVersion && !this.deviceInfo.osName) {
             const osData = androidVersions.get(this.deviceInfo.osVersion);
-            let osName = this.deviceInfo.osVersion;
             if (osData) {
-                osName = osData.name;
-                const osNumber = osData.semver;
-                return osName + '(' + osNumber + ')';
+                this.deviceInfo.osName = osData.name;
+                this.deviceInfo.osSemVer = osData.semver;
+                this.deviceInfo.osNdk = osData.ndk;
             }
+        }
+        if (this.deviceInfo.osName) {
+            return this.deviceInfo.osName + '(' + this.deviceInfo.osSemVer + ')';
         }
         return 'Unknown API: ' + this.deviceInfo.osVersion;
     }

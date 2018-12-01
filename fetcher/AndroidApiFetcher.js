@@ -4,10 +4,12 @@ const { google } = require('googleapis');
 const path = require('path');
 const LocaleHelper = require('./LocaleHelper');
 const Review = require('../common/Review');
+const androidDevices = require('android-device-list');
+const androidVersions = require('android-versions');
 
 module.exports = class AndroidApiFetcher {
 
-    async fetchReviews(appId, jwtFileName) {
+    async fetchReviews(appName, appId, jwtFileName) {
         const reviews = [];
         const client = await google.auth.getClient({
             keyFile: path.join(__dirname, jwtFileName),
@@ -28,18 +30,19 @@ module.exports = class AndroidApiFetcher {
                 finished = true;
             }
             for (const entry of fetchedReviews) {
-                reviews.push(await this.parseReview(appId, entry));
+                reviews.push(await this.parseReview(appName, appId, entry));
             }
         }
         return reviews;
     }
 
-    async parseReview(appId, json) {
+    async parseReview(appName, appId, json) {
         const deviceInfo = {};
         const appInfo = {};
         const reviewInfo = {};
 
         appInfo.id = appId;
+        appInfo.name = appName;
         appInfo.version = json.comments[0].userComment.appVersionName;
         appInfo.versionCode = json.comments[0].userComment.appVersionCode;
 
@@ -59,8 +62,27 @@ module.exports = class AndroidApiFetcher {
         }
 
         deviceInfo.platform = 'Android';
-        deviceInfo.device = json.comments[0].userComment.device;
-        deviceInfo.osVersion = json.comments[0].userComment.androidOsVersion;
+
+        if(json.comments[0].userComment.device) {
+            deviceInfo.device = json.comments[0].userComment.device;
+            const deviceName = androidDevices.getDevicesByDeviceId(deviceInfo.device);
+            if (deviceName[0]) {
+                deviceInfo.brand = deviceName[0].brand;
+                deviceInfo.name = deviceName[0].name;
+                deviceInfo.model = deviceName[0].model;
+            }
+        }
+
+        if(json.comments[0].userComment.androidOsVersion) {
+            deviceInfo.osVersion = json.comments[0].userComment.androidOsVersion;
+            const osData = androidVersions.get(deviceInfo.osVersion);
+            if (osData) {
+                deviceInfo.osName = osData.name;
+                deviceInfo.osSemVer = osData.semver;
+                deviceInfo.osNdk = osData.ndk;
+            }
+        }
+        
         deviceInfo.isoCode = json.comments[0].userComment.reviewerLanguage;
         deviceInfo.deviceMetadata = json.comments[0].userComment.deviceMetadata;
 

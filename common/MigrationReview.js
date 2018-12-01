@@ -1,10 +1,18 @@
+const androidDevices = require('android-device-list');
+const androidVersions = require('android-versions');
+
 let largestDepth = 0;
 
-module.exports = class Review {
+module.exports = class MigrationReview {
 
     constructor(deviceInfo, appInfo, reviewInfo, oldReviewInfo) {
         if (!reviewInfo.author) {
             reviewInfo.author = 'Anonymous';
+        }
+
+        if(reviewInfo.developerCommentDateTime && reviewInfo.developerCommentDateTime.getTime() === 0) {
+          delete reviewInfo.developerCommentDateTime;
+          delete reviewInfo.developerComment;
         }
 
         if (typeof reviewInfo.dateTime === 'string') {
@@ -21,11 +29,36 @@ module.exports = class Review {
             reviewInfo.source = 'RSS';
         }
 
+        if(deviceInfo.device && !deviceInfo.brand) {
+            const deviceName = androidDevices.getDevicesByDeviceId(deviceInfo.device);
+            if (deviceName[0]) {
+                deviceInfo.brand = deviceName[0].brand;
+                deviceInfo.name = deviceName[0].name;
+                deviceInfo.model = deviceName[0].model;
+            }
+        }
+
+        if (deviceInfo.osVersion && !deviceInfo.osName) {
+            const osData = androidVersions.get(deviceInfo.osVersion);
+            if (osData) {
+                deviceInfo.osName = osData.name;
+                deviceInfo.osSemVer = osData.semver;
+                deviceInfo.osNdk = osData.ndk;
+            }
+        }
+
         this.appInfo = appInfo;
+        this.lookupAppName(appInfo.id);
         this.reviewInfo = reviewInfo;
         this.deviceInfo = deviceInfo;
         this.oldReviewInfo = this.findOldReviewInfo(oldReviewInfo);
         this.logDepth();
+    }
+
+    lookupAppName(id){
+        const Configs = require('./Configs');
+        const configs = new Configs();
+        this.appInfo.name = configs.configForId(id);
     }
 
     findOldReviewInfo(oldReviewInfo, ignore) {
@@ -68,9 +101,9 @@ module.exports = class Review {
             const oldReview = this.findOldReviewInfo(this.oldReviewInfo, true);
             if(oldReview) {
                 if(oldReview.reviewInfo) {
-                    return new Review(this.oldReviewInfo.deviceInfo, this.oldReviewInfo.appInfo, this.oldReviewInfo.reviewInfo, oldReview);
+                    return new MigrationReview(this.oldReviewInfo.deviceInfo, this.oldReviewInfo.appInfo, this.oldReviewInfo.reviewInfo, oldReview);
                 } else if (oldReview.reviewinfo) {
-                    return new Review(this.oldReviewInfo.deviceinfo, this.oldReviewInfo.appinfo, this.oldReviewInfo.reviewinfo, oldReview);
+                    return new MigrationReview(this.oldReviewInfo.deviceinfo, this.oldReviewInfo.appinfo, this.oldReviewInfo.reviewinfo, oldReview);
                 }
             }
         }

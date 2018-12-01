@@ -19,7 +19,7 @@ const reviewColumn = new Column({
 const cs = new pgp.helpers.ColumnSet([reviewidColumn, appidColumn, postedDateColumn, reviewColumn, objectVersionColumn], {
     table: 'reviews'
 });
-const currentObjectVersion = 2;
+const currentObjectVersion = 4;
 
 module.exports = class ReviewJSONDB {
 
@@ -40,6 +40,8 @@ module.exports = class ReviewJSONDB {
         if (reviewMetadataTableResult[0].to_regclass) {
             await this.migrateOldMetadataToNew();
         }
+        await this.migrateFromv2Database();
+        await this.migrateFromv3Database();
     }
 
     async migrateOldMetadataToNew() {
@@ -54,9 +56,9 @@ module.exports = class ReviewJSONDB {
         await db.none('DROP TABLE reviewmetadata');
     }
 
-    async migrateOldReviewsToNew() {
-        const reviews = [];
+    async migrateFromv1Database(){
         const resultSet = await db.any('SELECT deviceinfo, appinfo, reviewinfo, oldreviewinfo FROM reviewjson ORDER BY reviewinfo->>\'dateTime\' desc NULLS LAST');
+        const reviews = [];
         if (resultSet.length > 0) {
             for (const result of resultSet) {
                 if (result) {
@@ -64,14 +66,47 @@ module.exports = class ReviewJSONDB {
                     reviews.push(createdReview);
                 }
             }
+            this.insertReviews(reviews);
         }
-        this.insertReviews(reviews);
         await db.none('DROP TABLE reviewjson');
     }
 
-    async upsertAverageRating(app, ratingJSON) {
+    async migrateFromv2Database(){
+      return this.migrateDatabase(2);
+    }
+
+    async migrateFromv3Database(){
+      return this.migrateDatabase(3);
+    }
+
+    async migrateDatabase(version){
+        const resultSet = await db.any('SELECT review FROM reviews WHERE objectversion = $1 ORDER BY posteddate desc NULLS LAST', [version]);
+        const reviews = [];
+        if (resultSet.length > 0) {
+            for (const result of resultSet) {
+                if (result) {
+                    if(result.review) {
+                        const deviceInfo = result.review.deviceInfo;
+                        const appInfo = result.review.appInfo;
+                        const reviewInfo = result.review.reviewInfo;
+                        let oldReviewInfo;
+                        if (result.review.oldReviewInfo) {
+                            oldReviewInfo = result.review.oldReviewInfo;
+                        }
+                        const createdReview = new MigrationReview(deviceInfo, appInfo, reviewInfo, oldReviewInfo);
+                        reviews.push(createdReview);
+                    } else {
+                        console.log('temp' + result);
+                    }
+                }
+            }
+            this.updateReviews(reviews);
+        }
+    }
+
+    async upsertAverageRating(app, ratingJSON, objectVersion=currentObjectVersion) {
         const query = 'INSERT INTO metadata (id, metadata, objectversion) VALUES ($1, $2, $3) ON CONFLICT (id) DO UPDATE SET metadata=EXCLUDED.metadata, objectversion=EXCLUDED.objectversion';
-        const values = [app, ratingJSON, currentObjectVersion];
+        const values = [app, ratingJSON, objectVersion];
         return db.none(query, values);
     }
 
@@ -95,33 +130,33 @@ module.exports = class ReviewJSONDB {
         return reviews;
     }
 
-    async insertReviews(reviewsToInsert) {
+    async insertReviews(reviewsToInsert, objectVersion=currentObjectVersion) {
         if (!reviewsToInsert || reviewsToInsert.length === 0) {
             return;
         }
-        const values = this.generateValuesForDb(reviewsToInsert);
+        const values = this.generateValuesForDb(reviewsToInsert, objectVersion);
         const query = pgp.helpers.insert(values, cs);
         return db.none(query);
     }
 
-    async updateReviews(reviewsToUpdate) {
+    async updateReviews(reviewsToUpdate, objectVersion=currentObjectVersion) {
         if (!reviewsToUpdate || reviewsToUpdate.length === 0) {
             return;
         }
-        const values = this.generateValuesForDb(reviewsToUpdate);
+        const values = this.generateValuesForDb(reviewsToUpdate, objectVersion);
         const query = pgp.helpers.update(values, cs) + ' WHERE v.id = t.id';
         return db.none(query);
     }
 
-    generateValuesForDb(reviews) {
+    generateValuesForDb(reviews, objectVersion) {
         const values = [];
         for (const review of reviews) {
             values.push({
                 id: review.reviewInfo.id,
                 appid: review.appInfo.id,
-                posteddate: review.reviewInfo.dateTime ? review.reviewInfo.dateTime : null,
+                posteddate: review.reviewInfo.dateTime ? review.reviewInfo.dateTime : new Date(0),
                 review: review.getJSON(),
-                objectversion: currentObjectVersion
+                objectversion: objectVersion
             });
         }
         return values;

@@ -7,7 +7,7 @@ const LocaleHelper = require('./LocaleHelper');
 
 module.exports = class iOSRSSFetcher {
 
-    async fetchReviews(appId, country) {
+    async fetchReviews(appName, appId, country) {
         const reviews = [];
         let page = 1;
         let finished = false;
@@ -20,7 +20,7 @@ module.exports = class iOSRSSFetcher {
                 break;
             }
             for (const entry of entries) {
-                reviews.push(await this.parseReview(appId, entry, country));
+                reviews.push(await this.parseReview(appName, appId, entry, country));
             }
             const lastPage = this.getLastPage(json.feed.link);
             if (page !== lastPage) {
@@ -32,7 +32,7 @@ module.exports = class iOSRSSFetcher {
         return reviews;
     }
 
-    async parseReview(appId, review, country) {
+    async parseReview(appName, appId, review, country) {
         const deviceInfo = {};
         const appInfo = {};
         const reviewInfo = {};
@@ -46,6 +46,7 @@ module.exports = class iOSRSSFetcher {
         reviewInfo.rating = rating;
         reviewInfo.source = 'RSS';
         appInfo.id = appId;
+        appInfo.name = appName;
         appInfo.version = review['im:version'][0];
         deviceInfo.platform = 'iOS';
         deviceInfo.countryCode = country;

@@ -61,9 +61,9 @@ module.exports = class DateFormatGueser {
         const dateFormat = formatToCodeMap[languageCode];
         if (dateFormat) {
             moment.locale(languageCode);
-            const date = moment(dateString, dateFormat);
-            if (date) {
-                return date;
+            const date = moment(dateString, dateFormat, true);
+            if (date && date.isValid()) {
+                return date.toDate();
             }
         }
         return null;

@@ -7,7 +7,7 @@ const DateFormatGueser = require('./DateFormatGueser');
 
 module.exports = class AndroidScrapingFetcher {
 
-    async fetchReviews(appId, languageCode) {
+    async fetchReviews(appName, appId, languageCode) {
         const reviews = [];
         let page = 0;
         let finished = false;
@@ -25,19 +25,20 @@ module.exports = class AndroidScrapingFetcher {
             }
 
             for (const entry of entries) {
-                reviews.push(await this.parseReview(appId, entry, languageCode));
+                reviews.push(await this.parseReview(appName, appId, entry, languageCode));
             }
             page++;
         }
         return reviews;
     }
 
-    async parseReview(appId, json, languageCode) {
+    async parseReview(appName, appId, json, languageCode) {
         const dateFormatGueser = new DateFormatGueser();
         const deviceInfo = {};
         const appInfo = {};
         const reviewInfo = {};
         appInfo.id = appId;
+        appInfo.name = appName;
         deviceInfo.platform = 'Android';
         const localeHelper = new LocaleHelper();
         deviceInfo.language = await localeHelper.getLanguage(languageCode);

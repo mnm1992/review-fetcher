@@ -42,7 +42,7 @@ async function startScraping() {
         if (app.androidConfig.authentication) {
             console.log("Scraping android reviews for: " + app.appName);
             console.time("Scraping android reviews for: " + app.appName);
-            const result = await reviewFetcher.fetchAndroidScrapedReviews(app.androidConfig.id, app.androidConfig.languages);
+            const result = await reviewFetcher.fetchAndroidScrapedReviews(app.appName, app.androidConfig.id, app.androidConfig.languages);
             const reviewsFromDb = await dbHelper.getAllReviews(app.androidConfig.id, app.iOSConfig.id);
             const cleanReviews = reviewHelper.mergeReviewsFromArrays(reviewsFromDb, result);
             cleanReviews.reviewsToInsert = mergeNewReviewsAndReviewToInsert(cleanReviews.newReviews, cleanReviews.reviewsToInsert);

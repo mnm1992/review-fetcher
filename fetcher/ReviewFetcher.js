@@ -11,20 +11,19 @@ module.exports = class ReviewFetcher {
     async checkForNewReviews(appName, androidAppId, androidAuthenticationFile, languages, iOSAppId, countries) {
         let reviews = [];
         let ratings = {};
-        const promiseList = [];
         if (androidAppId) {
             if (androidAuthenticationFile) {
-                const result = await this.fetchAndroidApiReviews(androidAppId, androidAuthenticationFile);
+                const result = await this.fetchAndroidApiReviews(appName, androidAppId, androidAuthenticationFile);
                 reviews = reviews.concat(result);
             } else {
-                const result = await this.fetchAndroidScrapedReviews(androidAppId, languages);
+                const result = await this.fetchAndroidScrapedReviews(appName, androidAppId, languages);
                 reviews = reviews.concat(result);
             }
             const result = await this.fetchAndroidRatings(androidAppId, languages);
             ratings = Object.assign(ratings, result);
         }
         if (iOSAppId) {
-            const resultReviews = await this.fetchIOSRSSReviews(iOSAppId, countries);
+            const resultReviews = await this.fetchIOSRSSReviews(appName, iOSAppId, countries);
             reviews = reviews.concat(resultReviews);
             const resultRatings = await this.fetchIOSRatings(iOSAppId, countries);
             ratings = Object.assign(ratings, resultRatings);
@@ -35,10 +34,10 @@ module.exports = class ReviewFetcher {
         };
     }
 
-    async fetchAndroidApiReviews(appId, jwtFileName) {
+    async fetchAndroidApiReviews(appName, appId, jwtFileName) {
         const androidApiFetcher = new AndroidApiFetcher();
         try {
-            const result = androidApiFetcher.fetchReviews(appId, jwtFileName);
+            const result = androidApiFetcher.fetchReviews(appName, appId, jwtFileName);
             return result;
         } catch (error) {
             console.error(error);
@@ -46,12 +45,12 @@ module.exports = class ReviewFetcher {
         }
     }
 
-    async fetchAndroidScrapedReviews(appId, languages) {
+    async fetchAndroidScrapedReviews(appName, appId, languages) {
         let reviews = [];
         const reviewScraper = new AndroidScrapingFetcher();
         for (const language of languages) {
             try {
-                const result = await reviewScraper.fetchReviews(appId, language);
+                const result = await reviewScraper.fetchReviews(appName, appId, language);
                 reviews = reviews.concat(result);
             } catch (error) {
                 console.error(error);
@@ -71,13 +70,12 @@ module.exports = class ReviewFetcher {
         }
     }
 
-    async fetchIOSRSSReviews(appId, countries) {
+    async fetchIOSRSSReviews(appName, appId, countries) {
         let reviews = [];
-        const promisePerCountry = [];
         const rssFetcher = new IOSRSSFetcher();
         for (const country of countries) {
             try {
-                const result = await rssFetcher.fetchReviews(appId, country);
+                const result = await rssFetcher.fetchReviews(appName, appId, country);
                 reviews = reviews.concat(result);
             } catch (error) {
                 console.error(error);

@@ -44,11 +44,15 @@ module.exports = class ExportPage {
     async constructJSONDump(config, response) {
         console.time('Exporting JSON');
         const reviewArray = [];
+        const ratings = await this.dbHelper.getRatings(config.appName);
         const reviews = await this.dbHelper.getAllReviews(config.androidConfig.id, config.iOSConfig.id);
         for (const review of reviews) {
             reviewArray.push(review.getJSON());
         }
-        const data = JSON.stringify(reviewArray);
+        const data = JSON.stringify({
+            ratings: ratings,
+            reviews: reviewArray
+        });
         const fileName = config.appName + '_reviews.json';
         this.responseHelper.sendFile(data, fileName, 'application/json', response);
         console.timeEnd('Exporting JSON');
@@ -73,7 +77,6 @@ module.exports = class ExportPage {
         console.time('Exporting csv');
         const reviewArray = [];
         let fields = [];
-        const fieldNames = [];
         if (config.androidConfig.authentication) {
             fields = require('./ReviewJSONToCSVMapExtended.json');
         } else {

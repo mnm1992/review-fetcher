@@ -32,7 +32,6 @@ module.exports = class IOSRatingFetcher {
         };
         try {
             const result = await Request(options);
-
             const json = html2json(result);
             const map = {};
             map[country] = this.jsonToHistogram(json, country);
@@ -74,7 +73,7 @@ module.exports = class IOSRatingFetcher {
         const amountOf2Stars = parseInt(this.walkJsonTree('child/11/attr/aria-label/2', ratingContainer));
         const amountOf1Stars = parseInt(this.walkJsonTree('child/13/attr/aria-label/2', ratingContainer));
 
-        if(!amountOf5Stars || !amountOf4Stars || !amountOf3Stars || !amountOf2Stars || !amountOf1Stars || isNaN(amountOf5Stars) || isNaN(amountOf4Stars) || isNaN(amountOf3Stars) || isNaN(amountOf2Stars) || isNaN(amountOf1Stars)) {
+        if(isNaN(amountOf5Stars) || isNaN(amountOf4Stars) || isNaN(amountOf3Stars) || isNaN(amountOf2Stars) || isNaN(amountOf1Stars)) {
             console.error('Not enough ratings for %s or apple changed the page layout', country);
             return this.emptyResponse;
         }
