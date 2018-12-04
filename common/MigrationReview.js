@@ -10,11 +10,6 @@ module.exports = class MigrationReview {
             reviewInfo.author = 'Anonymous';
         }
 
-        if(reviewInfo.developerCommentDateTime && reviewInfo.developerCommentDateTime.getTime() === 0) {
-          delete reviewInfo.developerCommentDateTime;
-          delete reviewInfo.developerComment;
-        }
-
         if (typeof reviewInfo.dateTime === 'string') {
             reviewInfo.dateTime = new Date(reviewInfo.dateTime);
         }

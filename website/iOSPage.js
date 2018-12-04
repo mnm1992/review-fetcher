@@ -20,7 +20,7 @@ module.exports = class IOSPage {
 
     async constructIOSPage(config, defaultParams, metadata, response) {
         console.time('Preparing the iOS page');
-        const reviews = await this.dbHelper.getReviews(config.androidConfig.id, config.iOSConfig.id, 'Android');
+        const reviews = await this.dbHelper.getReviews(config.androidConfig.id, config.iOSConfig.id, 'iOS');
         const histogramCalculator = new HistogramCalculator();
         const histogram = histogramCalculator.calculateHistogram(reviews);
         const averageDetail = histogramCalculator.averageFromReviews(reviews);

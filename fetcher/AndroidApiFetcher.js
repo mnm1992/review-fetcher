@@ -29,8 +29,10 @@ module.exports = class AndroidApiFetcher {
             } else {
                 finished = true;
             }
-            for (const entry of fetchedReviews) {
-                reviews.push(await this.parseReview(appName, appId, entry));
+            if(fetchedReviews) {
+                for (const entry of fetchedReviews) {
+                    reviews.push(await this.parseReview(appName, appId, entry));
+                }
             }
         }
         return reviews;
