@@ -54,7 +54,9 @@ module.exports = class HistogramCalculator {
     }
 
     mergeHistograms(histogramA, histogramB) {
-        if((!histogramA && !histogramB) || (histogramA.size < 5 && histogramB.size < 5)) {
+        const histogramANullOrEmpty = (!histogramA || histogramA.size < 5);
+        const histogramBNullOrEmpty = (!histogramB || histogramB.size < 5);
+        if (histogramANullOrEmpty && histogramBNullOrEmpty) {
             return {
                 1: 0,
                 2: 0,
@@ -62,9 +64,9 @@ module.exports = class HistogramCalculator {
                 4: 0,
                 5: 0
             };
-        } else if(!histogramA || histogramA.size < 5) {
+        } else if (histogramANullOrEmpty) {
             return histogramB;
-        } else if(!histogramB || histogramB.size < 5) {
+        } else if (histogramBNullOrEmpty) {
             return histogramA;
         }
 
